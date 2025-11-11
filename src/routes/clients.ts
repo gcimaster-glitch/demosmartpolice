@@ -313,4 +313,83 @@ clients.get('/:id/plan-history', authMiddleware, requireAdmin, async (c) => {
   }
 });
 
+// PUT /api/clients/:id/assign-staff - Assign staff to client (admin only)
+const assignStaffSchema = z.object({
+  mainAssigneeId: z.number().nullable().optional(),
+  subAssigneeId: z.number().nullable().optional(),
+});
+
+clients.put('/:id/assign-staff', authMiddleware, requireAdmin, zValidator('json', assignStaffSchema), async (c) => {
+  try {
+    const clientId = parseInt(c.req.param('id'));
+    const { mainAssigneeId, subAssigneeId } = await c.req.json();
+
+    // Check if client exists
+    const client = await queryFirst<Client>(
+      c.env.DB,
+      'SELECT * FROM clients WHERE id = ?',
+      clientId
+    );
+
+    if (!client) {
+      return c.json<ApiResponse>({ success: false, error: 'クライアントが見つかりません' }, 404);
+    }
+
+    // Verify staff members exist if provided
+    if (mainAssigneeId) {
+      const mainStaff = await queryFirst(
+        c.env.DB,
+        'SELECT id FROM staff WHERE id = ?',
+        mainAssigneeId
+      );
+      if (!mainStaff) {
+        return c.json<ApiResponse>({ success: false, error: '指定されたメイン担当者が見つかりません' }, 404);
+      }
+    }
+
+    if (subAssigneeId) {
+      const subStaff = await queryFirst(
+        c.env.DB,
+        'SELECT id FROM staff WHERE id = ?',
+        subAssigneeId
+      );
+      if (!subStaff) {
+        return c.json<ApiResponse>({ success: false, error: '指定されたサブ担当者が見つかりません' }, 404);
+      }
+    }
+
+    // Update assignments
+    const updates: string[] = [];
+    const values: any[] = [];
+
+    if (mainAssigneeId !== undefined) {
+      updates.push('main_assignee_id = ?');
+      values.push(mainAssigneeId);
+    }
+
+    if (subAssigneeId !== undefined) {
+      updates.push('sub_assignee_id = ?');
+      values.push(subAssigneeId);
+    }
+
+    if (updates.length > 0) {
+      updates.push('updated_at = CURRENT_TIMESTAMP');
+      values.push(clientId);
+
+      await c.env.DB
+        .prepare(`UPDATE clients SET ${updates.join(', ')} WHERE id = ?`)
+        .bind(...values)
+        .run();
+    }
+
+    return c.json<ApiResponse>({ 
+      success: true, 
+      message: 'スタッフの割り当てを更新しました' 
+    });
+  } catch (error) {
+    console.error('Assign staff error:', error);
+    return c.json<ApiResponse>({ success: false, error: 'スタッフの割り当てに失敗しました' }, 500);
+  }
+});
+
 export default clients;

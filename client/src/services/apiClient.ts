@@ -239,6 +239,11 @@ export const clientsAPI = {
     const response = await apiClient.get(`/clients/${id}/plan-history`);
     return response.data;
   },
+
+  assignStaff: async (id: number, mainAssigneeId?: number | null, subAssigneeId?: number | null): Promise<any> => {
+    const response = await apiClient.put(`/clients/${id}/assign-staff`, { mainAssigneeId, subAssigneeId });
+    return response.data;
+  },
 };
 
 // ============================================
@@ -419,6 +424,54 @@ export const eventsAPI = {
 
   getMyApplications: async (): Promise<any> => {
     const response = await apiClient.get('/events/applications/my');
+    return response.data;
+  },
+};
+
+// ============================================
+// Staff API
+// ============================================
+
+export const staffAPI = {
+  getAll: async (): Promise<any> => {
+    const response = await apiClient.get('/staff');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/staff/${id}`);
+    return response.data;
+  },
+
+  create: async (data: {
+    name: string;
+    realName: string;
+    businessName?: string;
+    displayNameType?: 'real' | 'business';
+    email: string;
+    role: string;
+    position?: string;
+    phone?: string;
+    photoUrl?: string;
+    profile?: string;
+    status?: 'active' | 'inactive';
+  }): Promise<any> => {
+    const response = await apiClient.post('/staff', data);
+    return response.data;
+  },
+
+  update: async (id: number, data: any): Promise<any> => {
+    const response = await apiClient.put(`/staff/${id}`, data);
+    return response.data;
+  },
+
+  approve: async (id: number): Promise<any> => {
+    const response = await apiClient.put(`/staff/${id}/approve`);
+    return response.data;
+  },
+
+  delete: async (id: number): Promise<any> => {
+    const response = await apiClient.delete(`/staff/${id}`);
     return response.data;
   },
 };

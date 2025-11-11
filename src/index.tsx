@@ -15,6 +15,7 @@ import plans from './routes/plans';
 import services from './routes/services';
 import seminars from './routes/seminars';
 import events from './routes/events';
+import staff from './routes/staff';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -39,6 +40,7 @@ app.route('/api/plans', plans);
 app.route('/api/services', services);
 app.route('/api/seminars', seminars);
 app.route('/api/events', events);
+app.route('/api/staff', staff);
 
 // Health check
 app.get('/api/health', (c) => {
