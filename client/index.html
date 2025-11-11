@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマートポリス | 企業の"もしも"に寄り添う、デジタル時代の用心棒</title>
+    <meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://www.google.com; img-src 'self' data: https://images.unsplash.com https://picsum.photos https://i.picsum.photos https://fastly.picsum.photos https://i.pravatar.cc;">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#2563eb',
+                        'secondary': '#64748b',
+                        'danger': '#dc2626',
+                        'warning': '#d97706',
+                        'success': '#059669',
+                        'info': '#2563eb'
+                    },
+                    fontFamily: {
+                        'jp': ['Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'メイリオ', 'Meiryo', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* フォーカスリング（アクセシビリティ） */
+        .focus-ring:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+
+        .enhanced-input {
+            border: 1px solid #d1d5db;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: #ffffff !important; /* Ensure light theme */
+            color: #1f2937 !important; /* Ensure dark text */
+        }
+        
+        .enhanced-input:hover {
+            border-color: #9ca3af;
+        }
+        
+        .enhanced-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        
+        .invalid-input {
+            border-color: #dc2626; /* danger */
+        }
+        
+        .invalid-input:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+        }
+
+        /* Override browser autofill styles which can cause visibility issues */
+        .enhanced-input:-webkit-autofill,
+        .enhanced-input:-webkit-autofill:hover, 
+        .enhanced-input:-webkit-autofill:focus, 
+        .enhanced-input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px white inset !important;
+            -webkit-text-fill-color: #1f2937 !important;
+            box-shadow: 0 0 0 30px white inset !important; /* For non-webkit browsers */
+        }
+
+        /* スクロールバーのスタイル */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a8a8a8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .line-clamp-3 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+        }
+        
+        /* Fix for white text on white background in table headers */
+        th {
+            color: #4a5568; /* equivalent to text-gray-700 */
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.2",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "url": "https://aistudiocdn.com/url@^0.11.4",
+    "react-dropzone-esm": "https://aistudiocdn.com/react-dropzone-esm@^15.2.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-50 font-jp min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "smartpolis-portal",
+  "version": "1.0.0",
+  "description": "Smart Police Enterprise Portal - Crisis Management & Security Platform",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev dist --d1=smartpolis-db --local --ip 0.0.0.0 --port 3000",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "vite build",
+    "preview": "wrangler pages dev dist",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name smartpolis-portal",
+    "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
+    "test": "curl http://localhost:3000",
+    "db:create": "wrangler d1 create smartpolis-db",
+    "db:migrate:local": "wrangler d1 migrations apply smartpolis-db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply smartpolis-db",
+    "db:seed": "wrangler d1 execute smartpolis-db --local --file=./migrations/seed.sql",
+    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local && npm run db:seed",
+    "db:console:local": "wrangler d1 execute smartpolis-db --local",
+    "db:console:prod": "wrangler d1 execute smartpolis-db"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "@hono/zod-validator": "^0.2.2",
+    "zod": "^3.23.8",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.0",
+    "@google/generative-ai": "^0.21.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250705.0",
+    "@hono/vite-cloudflare-pages": "^0.4.2",
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "wrangler": "^3.78.0"
+  }
+}
