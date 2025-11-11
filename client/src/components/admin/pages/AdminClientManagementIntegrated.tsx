@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { clientsAPI } from '../../../services/apiClient.ts';
+import { clientsAPI, plansAPI } from '../../../services/apiClient.ts';
 
 interface Client {
     id: number;
@@ -14,15 +14,30 @@ interface Client {
     remaining_tickets: number;
 }
 
+interface Plan {
+    id: string;
+    name: string;
+    description: string;
+    monthly_price: number;
+    annual_price: number;
+    initial_tickets: number;
+}
+
 const AdminClientManagementIntegrated: React.FC = () => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [plans, setPlans] = useState<Plan[]>([]);
+    const [showPlanModal, setShowPlanModal] = useState(false);
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+    const [changeReason, setChangeReason] = useState<string>('');
 
     useEffect(() => {
         fetchClients();
+        fetchPlans();
     }, []);
 
     const fetchClients = async () => {
@@ -42,6 +57,17 @@ const AdminClientManagementIntegrated: React.FC = () => {
         }
     };
 
+    const fetchPlans = async () => {
+        try {
+            const response = await plansAPI.getAll();
+            if (response.success) {
+                setPlans(response.data || []);
+            }
+        } catch (err) {
+            console.error('Plans fetch error:', err);
+        }
+    };
+
     const handleStatusChange = async (clientId: number, newStatus: 'active' | 'suspended') => {
         try {
             const response = await clientsAPI.updateStatus(clientId, newStatus);
@@ -55,6 +81,43 @@ const AdminClientManagementIntegrated: React.FC = () => {
         } catch (err) {
             console.error('Status update error:', err);
             alert('ステータスの更新に失敗しました');
+        }
+    };
+
+    const handleOpenPlanModal = (client: Client) => {
+        setSelectedClient(client);
+        setSelectedPlanId(client.plan_id);
+        setChangeReason('');
+        setShowPlanModal(true);
+    };
+
+    const handleClosePlanModal = () => {
+        setShowPlanModal(false);
+        setSelectedClient(null);
+        setSelectedPlanId('');
+        setChangeReason('');
+    };
+
+    const handlePlanChange = async () => {
+        if (!selectedClient || !selectedPlanId) return;
+
+        if (selectedPlanId === selectedClient.plan_id) {
+            alert('現在のプランと同じプランが選択されています');
+            return;
+        }
+
+        try {
+            const response = await clientsAPI.updatePlan(selectedClient.id, selectedPlanId, changeReason);
+            if (response.success) {
+                alert(response.message || 'プランを変更しました');
+                fetchClients();
+                handleClosePlanModal();
+            } else {
+                alert(response.error || 'プラン変更に失敗しました');
+            }
+        } catch (err) {
+            console.error('Plan change error:', err);
+            alert('プラン変更に失敗しました');
         }
     };
 
@@ -182,6 +245,9 @@ const AdminClientManagementIntegrated: React.FC = () => {
                                 連絡先
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                プラン
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 ステータス
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -210,6 +276,11 @@ const AdminClientManagementIntegrated: React.FC = () => {
                                         <div className="text-xs text-gray-500">{client.phone}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900 font-medium">
+                                            {plans.find(p => p.id === client.plan_id)?.name || client.plan_id}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         {getStatusBadge(client.status)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -229,6 +300,13 @@ const AdminClientManagementIntegrated: React.FC = () => {
                                             >
                                                 <i className="fas fa-eye"></i>
                                             </Link>
+                                            <button
+                                                onClick={() => handleOpenPlanModal(client)}
+                                                className="text-purple-600 hover:text-purple-800"
+                                                title="プラン変更"
+                                            >
+                                                <i className="fas fa-exchange-alt"></i>
+                                            </button>
                                             {client.status === 'active' ? (
                                                 <button
                                                     onClick={() => handleStatusChange(client.id, 'suspended')}
@@ -252,7 +330,7 @@ const AdminClientManagementIntegrated: React.FC = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                                     {searchTerm || statusFilter !== 'all' 
                                         ? '検索条件に一致するクライアントが見つかりません'
                                         : 'クライアントがまだ登録されていません'
@@ -263,6 +341,85 @@ const AdminClientManagementIntegrated: React.FC = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* プラン変更モーダル */}
+            {showPlanModal && selectedClient && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-900">
+                                <i className="fas fa-exchange-alt mr-2"></i>
+                                プラン変更
+                            </h2>
+                            <button
+                                onClick={handleClosePlanModal}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-2">クライアント</p>
+                            <p className="font-medium text-gray-900">{selectedClient.company_name}</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-2">現在のプラン</p>
+                            <p className="font-medium text-gray-900">
+                                {plans.find(p => p.id === selectedClient.plan_id)?.name || selectedClient.plan_id}
+                            </p>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                新しいプラン <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={selectedPlanId}
+                                onChange={(e) => setSelectedPlanId(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="">選択してください</option>
+                                {plans.map((plan) => (
+                                    <option key={plan.id} value={plan.id}>
+                                        {plan.name} - ¥{plan.monthly_price.toLocaleString()}/月
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                変更理由
+                            </label>
+                            <textarea
+                                value={changeReason}
+                                onChange={(e) => setChangeReason(e.target.value)}
+                                placeholder="プラン変更の理由を入力してください（任意）"
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleClosePlanModal}
+                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                            >
+                                キャンセル
+                            </button>
+                            <button
+                                onClick={handlePlanChange}
+                                disabled={!selectedPlanId || selectedPlanId === selectedClient.plan_id}
+                                className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            >
+                                変更する
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -204,4 +204,113 @@ clients.get('/:id/consumption', authMiddleware, requireAdmin, async (c) => {
   }
 });
 
+// PUT /api/clients/:id/plan - Update client plan (admin only)
+const updatePlanSchema = z.object({
+  planId: z.string(),
+  reason: z.string().optional(),
+});
+
+clients.put('/:id/plan', authMiddleware, requireAdmin, zValidator('json', updatePlanSchema), async (c) => {
+  try {
+    const user = c.get('user');
+    const clientId = parseInt(c.req.param('id'));
+    const { planId, reason } = await c.req.json();
+
+    // クライアントが存在するか確認
+    const client = await queryFirst<Client>(
+      c.env.DB,
+      'SELECT * FROM clients WHERE id = ?',
+      clientId
+    );
+
+    if (!client) {
+      return c.json<ApiResponse>({ success: false, error: 'クライアントが見つかりません' }, 404);
+    }
+
+    // 新しいプランが存在するか確認
+    const newPlan = await queryFirst(
+      c.env.DB,
+      'SELECT * FROM plans WHERE id = ?',
+      planId
+    );
+
+    if (!newPlan) {
+      return c.json<ApiResponse>({ success: false, error: '指定されたプランが見つかりません' }, 404);
+    }
+
+    // 旧プラン情報を取得
+    const oldPlan = await queryFirst(
+      c.env.DB,
+      'SELECT * FROM plans WHERE id = ?',
+      client.plan_id
+    );
+
+    // プランを更新
+    await c.env.DB
+      .prepare('UPDATE clients SET plan_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .bind(planId, clientId)
+      .run();
+
+    // プラン変更履歴を記録
+    const changeLogId = `plch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    await c.env.DB
+      .prepare(`
+        INSERT INTO plan_change_history (
+          id, client_id, old_plan_id, new_plan_id, 
+          changed_by_user_id, change_reason, change_date
+        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `)
+      .bind(
+        changeLogId,
+        clientId,
+        client.plan_id,
+        planId,
+        user.id,
+        reason || null
+      )
+      .run();
+
+    return c.json<ApiResponse>({ 
+      success: true, 
+      message: `プランを「${(oldPlan as any)?.name || '不明'}」から「${(newPlan as any)?.name || '不明'}」に変更しました`,
+      data: {
+        oldPlan: oldPlan,
+        newPlan: newPlan,
+        changeLogId: changeLogId
+      }
+    });
+  } catch (error) {
+    console.error('Update plan error:', error);
+    return c.json<ApiResponse>({ success: false, error: 'プランの更新に失敗しました' }, 500);
+  }
+});
+
+// GET /api/clients/:id/plan-history - Get plan change history (admin only)
+clients.get('/:id/plan-history', authMiddleware, requireAdmin, async (c) => {
+  try {
+    const clientId = c.req.param('id');
+
+    const history = await queryAll(
+      c.env.DB,
+      `SELECT 
+        pch.*,
+        op.name as old_plan_name,
+        np.name as new_plan_name,
+        u.name as changed_by_name
+       FROM plan_change_history pch
+       LEFT JOIN plans op ON pch.old_plan_id = op.id
+       LEFT JOIN plans np ON pch.new_plan_id = np.id
+       LEFT JOIN users u ON pch.changed_by_user_id = u.id
+       WHERE pch.client_id = ?
+       ORDER BY pch.change_date DESC`,
+      clientId
+    );
+
+    return c.json<ApiResponse>({ success: true, data: history });
+  } catch (error) {
+    console.error('Get plan history error:', error);
+    return c.json<ApiResponse>({ success: false, error: 'プラン変更履歴の取得に失敗しました' }, 500);
+  }
+});
+
 export default clients;

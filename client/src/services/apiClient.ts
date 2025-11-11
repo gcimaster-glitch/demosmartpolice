@@ -229,6 +229,16 @@ export const clientsAPI = {
     const response = await apiClient.get(`/clients/${id}/consumption`);
     return response.data;
   },
+
+  updatePlan: async (id: number, planId: string, reason?: string): Promise<any> => {
+    const response = await apiClient.put(`/clients/${id}/plan`, { planId, reason });
+    return response.data;
+  },
+
+  getPlanHistory: async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/clients/${id}/plan-history`);
+    return response.data;
+  },
 };
 
 // ============================================
