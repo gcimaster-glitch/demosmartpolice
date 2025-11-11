@@ -33,6 +33,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               name: userData.name,
               company: '', // Will be loaded from client data if needed
               role: userData.role,
+              clientId: userData.clientId,
+              staffId: userData.staffId,
+              affiliateId: userData.affiliateId,
             };
             setUser(authenticatedUser);
           } else {
@@ -83,6 +86,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           name: userData.name,
           company: '', // Will be loaded from client data if needed
           role: userData.role as any, // Type assertion for UserRole
+          clientId: userData.clientId,
+          staffId: userData.staffId,
+          affiliateId: userData.affiliateId,
         };
         
         setUser(authenticatedUser);

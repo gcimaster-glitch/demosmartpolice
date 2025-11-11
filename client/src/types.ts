@@ -73,6 +73,9 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  clientId?: number;
+  staffId?: number;
+  affiliateId?: string;
 }
 
 export interface Notification {

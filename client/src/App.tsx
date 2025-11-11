@@ -20,11 +20,11 @@ import Services from './components/pages/Services.tsx';
 import Materials from './components/pages/Materials.tsx';
 import Seminars from './components/pages/Seminars.tsx';
 import Events from './components/pages/Events.tsx';
-import Billing from './components/pages/Billing.tsx';
-import Users from './components/pages/Users.tsx';
+import Billing from './components/pages/BillingIntegrated.tsx';
+import Users from './components/pages/UsersIntegrated.tsx';
 import Reports from './components/pages/Reports.tsx';
 import PlaceholderPage from './components/pages/PlaceholderPage.tsx';
-import CompanyInfo from './components/pages/CompanyInfo.tsx';
+import CompanyInfo from './components/pages/CompanyInfoIntegrated.tsx';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import AdminProtectedRoute from './AdminProtectedRoute.tsx';
 import { useAuth } from './AuthContext.tsx';
@@ -34,8 +34,8 @@ import Register from './components/pages/Register.tsx';
 import EasyRegister from './components/pages/EasyRegister.tsx';
 import DetailedRegister from './components/pages/DetailedRegister.tsx';
 import LandingPage from './components/pages/LandingPage.tsx';
-import PlanChange from './components/pages/PlanChange.tsx';
-import TicketHistory from './components/pages/TicketHistory.tsx';
+import PlanChange from './components/pages/PlanChangeIntegrated.tsx';
+import TicketHistory from './components/pages/TicketHistoryIntegrated.tsx';
 import AIChatFAB from './components/AIChatFAB.tsx';
 
 

@@ -232,6 +232,95 @@ export const clientsAPI = {
 };
 
 // ============================================
+// Users API
+// ============================================
+
+export interface CreateUserRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  position?: string;
+  department?: string;
+  isPrimaryContact?: boolean;
+  role?: 'CLIENT' | 'CLIENTADMIN';
+}
+
+export interface UpdateUserRequest {
+  name?: string;
+  email?: string;
+  phone?: string;
+  position?: string;
+  department?: string;
+  isPrimaryContact?: boolean;
+  role?: 'CLIENT' | 'CLIENTADMIN';
+}
+
+export const usersAPI = {
+  getClientUsers: async (clientId: number): Promise<any> => {
+    const response = await apiClient.get(`/users/client/${clientId}`);
+    return response.data;
+  },
+
+  create: async (clientId: number, data: CreateUserRequest): Promise<any> => {
+    const response = await apiClient.post(`/users/client/${clientId}`, data);
+    return response.data;
+  },
+
+  update: async (userId: number, data: UpdateUserRequest): Promise<any> => {
+    const response = await apiClient.put(`/users/${userId}`, data);
+    return response.data;
+  },
+
+  delete: async (userId: number): Promise<any> => {
+    const response = await apiClient.delete(`/users/${userId}`);
+    return response.data;
+  },
+};
+
+// ============================================
+// Billing API
+// ============================================
+
+export const billingAPI = {
+  getClientInvoices: async (clientId: number): Promise<any> => {
+    const response = await apiClient.get(`/billing/client/${clientId}`);
+    return response.data;
+  },
+
+  getInvoiceById: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/billing/${id}`);
+    return response.data;
+  },
+
+  getAllInvoices: async (): Promise<any> => {
+    const response = await apiClient.get('/billing');
+    return response.data;
+  },
+};
+
+// ============================================
+// Plans API
+// ============================================
+
+export const plansAPI = {
+  getAll: async (): Promise<any> => {
+    const response = await apiClient.get('/plans');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/plans/${id}`);
+    return response.data;
+  },
+
+  changePlan: async (clientId: number, newPlanId: string): Promise<any> => {
+    const response = await apiClient.post('/plans/change', { clientId, newPlanId });
+    return response.data;
+  },
+};
+
+// ============================================
 // Error Handler
 // ============================================
 
