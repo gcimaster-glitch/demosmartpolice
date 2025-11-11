@@ -37,6 +37,8 @@ const AdminClientManagementIntegrated: React.FC = () => {
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [selectedPlanId, setSelectedPlanId] = useState<string>('');
     const [changeReason, setChangeReason] = useState<string>('');
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editedClient, setEditedClient] = useState<any>(null);
 
     useEffect(() => {
         if (id) {
@@ -145,6 +147,47 @@ const AdminClientManagementIntegrated: React.FC = () => {
         }
     };
 
+    const handleEditMode = () => {
+        if (clientDetail) {
+            setEditedClient({
+                company_name: clientDetail.client.company_name,
+                contact_name: clientDetail.client.contact_name,
+                email: clientDetail.client.email,
+                phone: clientDetail.client.phone,
+            });
+            setIsEditMode(true);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditMode(false);
+        setEditedClient(null);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!id || !editedClient) return;
+
+        try {
+            const response = await clientsAPI.update(parseInt(id), {
+                companyName: editedClient.company_name,
+                contactPerson: editedClient.contact_name,
+                email: editedClient.email,
+                phone: editedClient.phone,
+            });
+            
+            if (response.success) {
+                alert('クライアント情報を更新しました');
+                setIsEditMode(false);
+                fetchClientDetail(parseInt(id));
+            } else {
+                alert(response.error || '更新に失敗しました');
+            }
+        } catch (err) {
+            console.error('Update error:', err);
+            alert('更新に失敗しました');
+        }
+    };
+
     const filteredClients = clients.filter(client => {
         const matchesSearch = 
             client.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -203,16 +246,45 @@ const AdminClientManagementIntegrated: React.FC = () => {
 
         return (
             <div className="fade-in">
-                <div className="mb-6 flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/app/admin/clients')}
-                        className="text-gray-600 hover:text-gray-900"
-                    >
-                        <i className="fas fa-arrow-left text-xl"></i>
-                    </button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">クライアント詳細</h1>
-                        <p className="text-gray-600 mt-2">{client.company_name}</p>
+                <div className="mb-6 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/app/admin/clients')}
+                            className="text-gray-600 hover:text-gray-900"
+                        >
+                            <i className="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">クライアント詳細</h1>
+                            <p className="text-gray-600 mt-2">{client.company_name}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        {!isEditMode ? (
+                            <button
+                                onClick={handleEditMode}
+                                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
+                            >
+                                <i className="fas fa-edit mr-2"></i>
+                                編集
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={handleSaveEdit}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                >
+                                    <i className="fas fa-save mr-2"></i>
+                                    保存
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -223,30 +295,85 @@ const AdminClientManagementIntegrated: React.FC = () => {
                             <i className="fas fa-building mr-2 text-primary"></i>
                             基本情報
                         </h2>
-                        <dl className="space-y-3">
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">企業名</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{client.company_name}</dd>
+                        {!isEditMode ? (
+                            <dl className="space-y-3">
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-500">企業名</dt>
+                                    <dd className="mt-1 text-sm text-gray-900">{client.company_name}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-500">担当者</dt>
+                                    <dd className="mt-1 text-sm text-gray-900">{client.contact_name}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-500">メールアドレス</dt>
+                                    <dd className="mt-1 text-sm text-gray-900">{client.email}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-500">電話番号</dt>
+                                    <dd className="mt-1 text-sm text-gray-900">{client.phone}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-500">登録日</dt>
+                                    <dd className="mt-1 text-sm text-gray-900">
+                                        {new Date(client.registration_date).toLocaleDateString('ja-JP')}
+                                    </dd>
+                                </div>
+                            </dl>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        企業名 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editedClient?.company_name || ''}
+                                        onChange={(e) => setEditedClient({...editedClient, company_name: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        担当者名 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editedClient?.contact_name || ''}
+                                        onChange={(e) => setEditedClient({...editedClient, contact_name: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        メールアドレス <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={editedClient?.email || ''}
+                                        onChange={(e) => setEditedClient({...editedClient, email: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        電話番号 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={editedClient?.phone || ''}
+                                        onChange={(e) => setEditedClient({...editedClient, phone: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-500 mb-1">登録日</label>
+                                    <p className="text-sm text-gray-900">
+                                        {new Date(client.registration_date).toLocaleDateString('ja-JP')}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">担当者</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{client.contact_name}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">メールアドレス</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{client.email}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">電話番号</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{client.phone}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">登録日</dt>
-                                <dd className="mt-1 text-sm text-gray-900">
-                                    {new Date(client.registration_date).toLocaleDateString('ja-JP')}
-                                </dd>
-                            </div>
-                        </dl>
+                        )}
                     </div>
 
                     {/* プラン・ステータス情報 */}
