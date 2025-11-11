@@ -42,7 +42,7 @@ import AIChatFAB from './components/AIChatFAB.tsx';
 // Admin Components
 import AdminSidebar from './components/admin/AdminSidebar.tsx';
 import AdminDashboard from './components/admin/pages/AdminDashboardIntegrated.tsx';
-import AdminClientManagement from './components/admin/pages/AdminClientManagementIntegrated.tsx';
+import AdminClientManagement from './components/admin/pages/AdminClientManagement.tsx';
 import AdminStaffManagement from './components/admin/pages/AdminStaffManagement.tsx';
 import AdminTicketManagement from './components/admin/pages/AdminTicketManagementIntegrated.tsx';
 import AdminTicketHistoryManagement from './components/admin/pages/AdminTicketHistoryManagement.tsx';
