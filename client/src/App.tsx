@@ -218,6 +218,7 @@ const ClientRoutes = () => (
 
 const AdminRoutes = () => (
      <Routes>
+        <Route path="/" element={<Navigate to="/app/admin" replace />} />
         <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             
