@@ -465,7 +465,7 @@ const MessageDetail: React.FC = () => {
                                                 <div className="flex items-center">
                                                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3"> <i className={`${member.avatar} text-gray-600`}></i> </div>
                                                     <div>
-                                                        <p className="font-medium">{member.name}</p>
+                                                        <p className="font-medium text-gray-900">{member.name}</p>
                                                         <div className="flex items-center">
                                                             <p className="text-sm text-gray-500">{member.role}</p>
                                                             {isSpecialist && <span className="ml-2 text-xs font-bold text-yellow-600 flex items-center gap-1"><i className="fas fa-ticket-alt"></i>チケット消費</span>}
@@ -485,7 +485,7 @@ const MessageDetail: React.FC = () => {
                                             <div key={member.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                                                 <div className="flex items-center">
                                                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3"><i className={`${member.avatar} text-gray-600`}></i></div>
-                                                    <div><p className="font-medium text-gray-800">{member.name}</p><p className="text-sm text-gray-500">{member.role}</p></div>
+                                                    <div><p className="font-medium text-gray-900">{member.name}</p><p className="text-sm text-gray-500">{member.role}</p></div>
                                                 </div>
                                                 <span className="text-xs text-green-600 font-semibold">参加中</span>
                                             </div>

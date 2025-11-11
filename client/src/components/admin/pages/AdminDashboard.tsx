@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useClientData } from '../../../ClientDataContext.tsx';
 import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
-    const { clients, tickets, serviceApplications, invoices } = useClientData();
+    const { clients, tickets, serviceApplications, invoices, calculateClientProfileCompletion } = useClientData();
     const navigate = useNavigate();
 
     const recentClients = [...clients].sort((a, b) => new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime()).slice(0, 3);
@@ -43,6 +43,18 @@ const AdminDashboard: React.FC = () => {
     const sourceData = [ { name: '自然検索', value: 400 }, { name: '紹介', value: 300 }, { name: '広告', value: 300 }, { name: 'SNS', value: 200 } ];
     const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
 
+    const incompleteClients = useMemo(() => {
+        return clients
+            .map(client => ({
+                id: client.id,
+                companyName: client.companyName,
+                completion: calculateClientProfileCompletion(client),
+            }))
+            .filter(client => client.completion < 100)
+            .sort((a, b) => a.completion - b.completion)
+            .slice(0, 5);
+    }, [clients, calculateClientProfileCompletion]);
+
 
     return (
         <div className="fade-in space-y-6">
@@ -51,6 +63,28 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-500">ようこそ、管理者様。現在のシステム状況の概要です。</p>
             </div>
             
+            {incompleteClients.length > 0 && (
+                <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-400">
+                    <h2 className="text-lg font-semibold text-yellow-800 mb-4 flex items-center">
+                        <i className="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                        情報入力が未完了のクライアント (要フォロー)
+                    </h2>
+                    <div className="space-y-4">
+                        {incompleteClients.map(client => (
+                            <div key={client.id} className="cursor-pointer hover:bg-gray-50 p-2 rounded-md -mx-2" onClick={() => navigate(`/app/clients/${client.id}`)}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="font-semibold text-gray-800">{client.companyName}</p>
+                                    <p className="text-sm font-bold text-gray-700">{Math.round(client.completion)}%</p>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-yellow-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${client.completion}%` }}></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Financial & System Health */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  {/* Financial Summary */}
@@ -136,7 +170,7 @@ const AdminDashboard: React.FC = () => {
                             </div>
                         </div>
                          <div>
-                            <h3 className="font-medium text-sm text-gray-600 mb-2 border-b pb-1">新規相談チケット</h3>
+                            <h3 className="font-medium text-sm text-gray-600 mb-2 border-b pb-1">新規相談</h3>
                             <div className="space-y-2">
                                 {recentTickets.map(t => (
                                     <div key={t.id} className="text-xs cursor-pointer hover:bg-gray-50 p-1 rounded" onClick={() => navigate(`/app/tickets/${t.id}`)}>

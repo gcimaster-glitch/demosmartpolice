@@ -3,6 +3,7 @@
 
 
 
+
 import React, { useState } from 'react';
 import { Routes, Route, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
@@ -10,11 +11,11 @@ import Header from './components/Header.tsx';
 import Navbar from './components/Navbar.tsx';
 import Footer from './components/Footer.tsx';
 import MobileBottomNav from './components/MobileBottomNav.tsx';
-import Dashboard from './components/pages/Dashboard.tsx';
-import Announcements from './components/pages/Announcements.tsx';
+import Dashboard from './components/pages/DashboardIntegrated.tsx';
+import Announcements from './components/pages/AnnouncementsIntegrated.tsx';
 import MessagesLayout from './components/pages/MessagesLayout.tsx';
-import MessageDetail from './components/pages/MessageDetail.tsx';
-import NewMessage from './components/pages/NewMessage.tsx';
+import MessageDetail from './components/pages/MessageDetailIntegrated.tsx';
+import NewMessage from './components/pages/NewMessageIntegrated.tsx';
 import Services from './components/pages/Services.tsx';
 import Materials from './components/pages/Materials.tsx';
 import Seminars from './components/pages/Seminars.tsx';
@@ -33,7 +34,6 @@ import Register from './components/pages/Register.tsx';
 import EasyRegister from './components/pages/EasyRegister.tsx';
 import DetailedRegister from './components/pages/DetailedRegister.tsx';
 import LandingPage from './components/pages/LandingPage.tsx';
-import SimpleRegister from './components/pages/SimpleRegister.tsx';
 import PlanChange from './components/pages/PlanChange.tsx';
 import TicketHistory from './components/pages/TicketHistory.tsx';
 import AIChatFAB from './components/AIChatFAB.tsx';
@@ -41,12 +41,12 @@ import AIChatFAB from './components/AIChatFAB.tsx';
 
 // Admin Components
 import AdminSidebar from './components/admin/AdminSidebar.tsx';
-import AdminDashboard from './components/admin/pages/AdminDashboard.tsx';
-import AdminClientManagement from './components/admin/pages/AdminClientManagement.tsx';
+import AdminDashboard from './components/admin/pages/AdminDashboardIntegrated.tsx';
+import AdminClientManagement from './components/admin/pages/AdminClientManagementIntegrated.tsx';
 import AdminStaffManagement from './components/admin/pages/AdminStaffManagement.tsx';
-import AdminTicketManagement from './components/admin/pages/AdminTicketManagement.tsx';
+import AdminTicketManagement from './components/admin/pages/AdminTicketManagementIntegrated.tsx';
 import AdminTicketHistoryManagement from './components/admin/pages/AdminTicketHistoryManagement.tsx';
-import AdminAnnouncements from './components/admin/pages/AdminAnnouncements.tsx';
+import AdminAnnouncements from './components/admin/pages/AdminAnnouncementsIntegrated.tsx';
 import AdminSeminarManagement from './components/admin/pages/AdminSeminarManagement.tsx';
 import AdminEventManagement from './components/admin/pages/AdminEventManagement.tsx';
 import AdminMaterialsManagement from './components/admin/pages/AdminMaterialsManagement.tsx';
@@ -349,7 +349,6 @@ const App: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/register/easy" element={<EasyRegister />} />
-                <Route path="/register/simple" element={<SimpleRegister />} />
                 <Route path="/register/detailed" element={<DetailedRegister />} />
                 <Route 
                     path="/app/*"

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext.tsx';
-// Fix: Add '.tsx' extension to the import path for ClientDataContext.
 import { useClientData } from '../ClientDataContext.tsx';
 
 const CrisisManagerCard: React.FC = () => {

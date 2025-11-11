@@ -42,13 +42,11 @@ const Navbar: React.FC = () => {
     const navItems = [
         { to: "/app", icon: "fa-home", label: "ホーム", show: true },
         { to: "/app/announcements", icon: "fa-bullhorn", label: "お知らせ", show: true },
-        { to: "/app/messages", icon: "fa-comments", label: "相談・連絡", show: true },
-        { to: "/app/ticket-history", icon: "fa-history", label: "チケット管理", show: true },
+        { to: "/app/messages", icon: "fa-comments", label: "相談", show: true },
         { to: "/app/services", icon: "fa-concierge-bell", label: "サービス", show: canViewServices },
         { to: "/app/materials", icon: "fa-folder-open", label: "資料室", show: canViewMaterials },
         { to: "/app/seminars", icon: "fa-chalkboard-teacher", label: "セミナー", show: true },
         { to: "/app/events", icon: "fa-calendar-check", label: "イベント", show: true },
-        { to: "/app/billing", icon: "fa-receipt", label: "請求", show: canViewBilling },
     ];
     
     const visibleNavItems = navItems.filter(item => item.show);
@@ -93,6 +91,8 @@ const Navbar: React.FC = () => {
                                         {canEditCompanyInfo && <NavLink to="/app/company" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-building mr-2"></i>自社情報</NavLink>}
                                         {canManageUsers && <NavLink to="/app/users" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-users mr-2"></i>ユーザー管理</NavLink>}
                                         {canViewReports && <NavLink to="/app/reports" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-chart-line mr-2"></i>レポート・分析</NavLink>}
+                                        <NavLink to="/app/ticket-history" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-history mr-2"></i>チケット管理</NavLink>
+                                        {canViewBilling && <NavLink to="/app/billing" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-receipt mr-2"></i>請求情報</NavLink>}
                                         {!isFreePlan && <NavLink to="/app/plan-change" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-gem mr-2"></i>プラン変更</NavLink>}
                                         <div className="border-t border-gray-100 my-1"></div>
                                         <NavLink to="/app/settings" className="block px-4 py-2 text-gray-700 hover:bg-gray-50 text-sm transition-colors"><i className="fas fa-cog mr-2"></i>設定</NavLink>

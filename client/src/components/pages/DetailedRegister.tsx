@@ -15,7 +15,7 @@ const DetailedRegister: React.FC = () => {
         billing_name: '', billing_postal_code: '', billing_prefecture: '',
         billing_city: '', billing_address: '', billing_phone: '', payment_method: 'credit_card',
         card_number: '', card_expiry: '', card_cvc: '',
-        bank_name: '', branch_name: '', account_type: '普通', account_number: '', account_holder_name: '',
+        bank_name: '', branch_name: '', account_type: '普通' as '普通' | '当座', account_number: '', account_holder_name: '',
         contract_plan: '',
         referral_code: '',
         terms_agreed: false, privacy_policy_agreed: false,
@@ -59,6 +59,11 @@ const DetailedRegister: React.FC = () => {
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!formData.company_name) newErrors.company_name = '必須項目です';
+        if (!formData.company_registration_number) {
+            newErrors.company_registration_number = '必須項目です';
+        } else if (formData.company_registration_number.length !== 13 || !/^\d+$/.test(formData.company_registration_number)) {
+            newErrors.company_registration_number = '13桁の数字で入力してください';
+        }
         if (!formData.postal_code) newErrors.postal_code = '必須項目です';
         if (!formData.address) newErrors.address = '必須項目です';
         if (!formData.family_name) newErrors.family_name = '必須項目です';
@@ -110,11 +115,28 @@ const DetailedRegister: React.FC = () => {
                         <section className="mb-8">
                              <h2 className="text-xl font-bold text-gray-800 mb-4">法人基本情報</h2>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label className="block text-sm font-medium text-gray-700">企業名<span className="text-danger">*</span></label><input type="text" name="company_name" required value={formData.company_name} onChange={handleChange} className={inputClass('company_name')} /></div>
-                                <div><label className="block text-sm font-medium text-gray-700">郵便番号<span className="text-danger">*</span></label><input type="text" name="postal_code" required value={formData.postal_code} onChange={handleChange} className={inputClass('postal_code')} /></div>
+                                 <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">法人番号<span className="text-danger">*</span></label>
+                                    <input type="text" name="company_registration_number" required value={formData.company_registration_number} onChange={handleChange} className={inputClass('company_registration_number')} maxLength={13} />
+                                    {errors.company_registration_number && <p className="text-xs text-danger mt-1">{errors.company_registration_number}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">企業名<span className="text-danger">*</span></label>
+                                    <input type="text" name="company_name" required value={formData.company_name} onChange={handleChange} className={inputClass('company_name')} />
+                                    {errors.company_name && <p className="text-xs text-danger mt-1">{errors.company_name}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">郵便番号<span className="text-danger">*</span></label>
+                                    <input type="text" name="postal_code" required value={formData.postal_code} onChange={handleChange} className={inputClass('postal_code')} />
+                                    {errors.postal_code && <p className="text-xs text-danger mt-1">{errors.postal_code}</p>}
+                                </div>
                                 <div><label className="block text-sm font-medium text-gray-700">都道府県</label><input type="text" name="prefecture" value={formData.prefecture} onChange={handleChange} className={inputClass('prefecture')} /></div>
                                 <div><label className="block text-sm font-medium text-gray-700">市区町村</label><input type="text" name="city" value={formData.city} onChange={handleChange} className={inputClass('city')} /></div>
-                                <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700">番地以降<span className="text-danger">*</span></label><input type="text" name="address" required value={formData.address} onChange={handleChange} className={inputClass('address')} /></div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">番地以降<span className="text-danger">*</span></label>
+                                    <input type="text" name="address" required value={formData.address} onChange={handleChange} className={inputClass('address')} />
+                                    {errors.address && <p className="text-xs text-danger mt-1">{errors.address}</p>}
+                                </div>
                                 <div><label className="block text-sm font-medium text-gray-700">電話番号</label><input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass('phone')} /></div>
                             </div>
                         </section>
@@ -123,11 +145,31 @@ const DetailedRegister: React.FC = () => {
                         <section className="mb-8">
                             <h2 className="text-xl font-bold text-gray-800 mb-4">担当者情報</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label className="block text-sm font-medium text-gray-700">姓<span className="text-danger">*</span></label><input type="text" name="family_name" required value={formData.family_name} onChange={handleChange} className={inputClass('family_name')} /></div>
-                                <div><label className="block text-sm font-medium text-gray-700">名<span className="text-danger">*</span></label><input type="text" name="given_name" required value={formData.given_name} onChange={handleChange} className={inputClass('given_name')} /></div>
-                                <div className="md:col-span-2"><label className="block text-sm font-medium text-gray-700">メールアドレス<span className="text-danger">*</span></label><input type="email" name="email" required value={formData.email} onChange={handleChange} className={inputClass('email')} /></div>
-                                <div><label className="block text-sm font-medium text-gray-700">パスワード<span className="text-danger">*</span></label><input type="password" name="password" required value={formData.password} onChange={handleChange} className={inputClass('password')} /></div>
-                                <div><label className="block text-sm font-medium text-gray-700">パスワード（確認）<span className="text-danger">*</span></label><input type="password" name="password_confirm" required value={formData.password_confirm} onChange={handleChange} className={inputClass('password_confirm')} /></div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">姓<span className="text-danger">*</span></label>
+                                    <input type="text" name="family_name" required value={formData.family_name} onChange={handleChange} className={inputClass('family_name')} />
+                                    {errors.family_name && <p className="text-xs text-danger mt-1">{errors.family_name}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">名<span className="text-danger">*</span></label>
+                                    <input type="text" name="given_name" required value={formData.given_name} onChange={handleChange} className={inputClass('given_name')} />
+                                    {errors.given_name && <p className="text-xs text-danger mt-1">{errors.given_name}</p>}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">メールアドレス<span className="text-danger">*</span></label>
+                                    <input type="email" name="email" required value={formData.email} onChange={handleChange} className={inputClass('email')} />
+                                    {errors.email && <p className="text-xs text-danger mt-1">{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">パスワード<span className="text-danger">*</span></label>
+                                    <input type="password" name="password" required value={formData.password} onChange={handleChange} className={inputClass('password')} />
+                                    {errors.password && <p className="text-xs text-danger mt-1">{errors.password}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">パスワード（確認）<span className="text-danger">*</span></label>
+                                    <input type="password" name="password_confirm" required value={formData.password_confirm} onChange={handleChange} className={inputClass('password_confirm')} />
+                                    {errors.password_confirm && <p className="text-xs text-danger mt-1">{errors.password_confirm}</p>}
+                                </div>
                             </div>
                         </section>
                          <hr className="my-8" />
@@ -158,6 +200,7 @@ const DetailedRegister: React.FC = () => {
                                     </label>
                                 ))}
                              </div>
+                              {errors.contract_plan && <p className="text-xs text-danger mt-1">{errors.contract_plan}</p>}
                         </section>
                         <hr className="my-8" />
                         {/* 紹介者コード */}
@@ -168,12 +211,20 @@ const DetailedRegister: React.FC = () => {
                          <hr className="my-8" />
                         {/* 同意 */}
                         <section className="mb-8">
-                            <label className="flex items-start mb-4"><input type="checkbox" name="terms_agreed" checked={formData.terms_agreed} onChange={handleChange} className="mt-1 mr-2" /><span className="text-gray-700">利用規約に同意します<span className="text-danger">*</span></span></label>
-                            <label className="flex items-start"><input type="checkbox" name="privacy_policy_agreed" checked={formData.privacy_policy_agreed} onChange={handleChange} className="mt-1 mr-2" /><span className="text-gray-700">個人情報保護方針に同意します<span className="text-danger">*</span></span></label>
+                            <label className="flex items-start mb-4">
+                                <input type="checkbox" name="terms_agreed" checked={formData.terms_agreed} onChange={handleChange} className="mt-1 mr-2" />
+                                <span className="text-gray-700">利用規約に同意します<span className="text-danger">*</span></span>
+                            </label>
+                             {errors.terms_agreed && <p className="text-xs text-danger">{errors.terms_agreed}</p>}
+                            <label className="flex items-start">
+                                <input type="checkbox" name="privacy_policy_agreed" checked={formData.privacy_policy_agreed} onChange={handleChange} className="mt-1 mr-2" />
+                                <span className="text-gray-700">個人情報保護方針に同意します<span className="text-danger">*</span></span>
+                            </label>
+                            {errors.privacy_policy_agreed && <p className="text-xs text-danger">{errors.privacy_policy_agreed}</p>}
                         </section>
                         <div className="flex items-center justify-center space-x-4">
                              <Link to="/register" className="px-8 py-3 border rounded-lg text-gray-700 hover:bg-gray-100">戻る</Link>
-                            <button type="submit" disabled={isLoading} className="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg">
+                            <button type="submit" disabled={isLoading} className="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:bg-gray-400">
                                 {isLoading ? '送信中...' : '登録申請を送信'}
                             </button>
                         </div>

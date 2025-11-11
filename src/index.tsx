@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { serveStatic } from 'hono/cloudflare-workers';
 import type { Bindings } from './types';
 
 // Import routes
@@ -38,10 +37,21 @@ app.get('/api/health', (c) => {
   });
 });
 
-// Serve static files from client build
-app.use('/*', serveStatic({ root: './client/dist' }));
-
-// Fallback to index.html for client-side routing
-app.get('*', serveStatic({ path: './client/dist/index.html' }));
+// Root route - for now just return API info
+// Frontend will be served separately by wrangler pages dev
+app.get('/', (c) => {
+  return c.json({
+    name: 'Smart Police Portal API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      dashboard: '/api/dashboard',
+      announcements: '/api/announcements',
+      tickets: '/api/tickets',
+      clients: '/api/clients',
+      health: '/api/health'
+    }
+  });
+});
 
 export default app;

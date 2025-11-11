@@ -14,8 +14,8 @@ const paymentMethodLabels = {
     bank_transfer: '銀行振込',
 };
 
-// FIX: Add helper to format address object to string for display, handling potentially undefined parts.
-const addressToString = (addr: Address) => {
+const addressToString = (addr?: Address) => {
+    if (!addr) return '';
     return `${addr.prefecture || ''}${addr.city || ''}${addr.address1 || ''} ${addr.address2 || ''}`.trim();
 };
 
@@ -41,7 +41,6 @@ const Section: React.FC<{ title: string; icon: string; children: React.ReactNode
 
 const CompanyInfo: React.FC = () => {
     const { user } = useAuth();
-    // FIX: Use `currentClient` and `saveClient` from context, aliasing them to match the component's existing variable names.
     const { currentClient: companyProfile, saveClient: saveCompanyProfile, plans } = useClientData();
     const [isEditing, setIsEditing] = useState(false);
     const [editedProfile, setEditedProfile] = useState<Client | undefined | null>(companyProfile);
@@ -53,7 +52,6 @@ const CompanyInfo: React.FC = () => {
         setEditedProfile(companyProfile);
     }, [companyProfile, isEditing]);
 
-    // FIX: Add a guard to handle the case where `companyProfile` (currentClient) is not yet available.
     if (!companyProfile || !user) {
          return (
             <div className="fade-in text-center py-20">
@@ -125,7 +123,6 @@ const CompanyInfo: React.FC = () => {
         alert('企業情報を更新しました。');
     };
 
-    // FIX: Update handleChange to safely handle nested objects like address fields
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setEditedProfile(prev => {
@@ -186,7 +183,6 @@ const CompanyInfo: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
                 
                 <Section title="基本情報" icon="fa-id-card">
-                    {/* FIX: Use `id` instead of `companyId` */}
                     <InfoRow label="企業ID" value={companyProfile.id} />
                     <InfoRow label="会社名" value={isEditing ? <EditableValue name="companyName"><input type="text" name="companyName" value={editedProfile.companyName} onChange={handleChange} className={inputClass('companyName')} /></EditableValue> : companyProfile.companyName} />
                     <InfoRow label="メイン担当者名" value={isEditing ? <EditableValue name="contactPerson"><input type="text" name="contactPerson" value={editedProfile.contactPerson} onChange={handleChange} className={inputClass('contactPerson')} /></EditableValue> : companyProfile.contactPerson} />
@@ -202,7 +198,6 @@ const CompanyInfo: React.FC = () => {
                 
                 <Section title="登記情報" icon="fa-file-alt">
                     <InfoRow label="法人番号" value={isEditing ? <EditableValue name="corporateNumber"><input type="text" name="corporateNumber" value={editedProfile.corporateNumber} onChange={handleChange} className={inputClass('corporateNumber')} /></EditableValue> : companyProfile.corporateNumber} />
-                    {/* FIX: Use `address` instead of `registeredAddress` and provide inputs for editing */}
                     <InfoRow label="本店所在地" value={isEditing ? 
                         <EditableValue name="address">
                             <div className="space-y-1">
@@ -234,7 +229,7 @@ const CompanyInfo: React.FC = () => {
                                 <input type="text" name="billingAddress.address2" value={editedProfile.billingAddress?.address2 || ''} onChange={handleChange} placeholder="建物名・部屋番号" className={inputClass('billingAddress.address2')} />
                             </div>
                         </EditableValue> 
-                        : companyProfile.billingAddress ? addressToString(companyProfile.billingAddress) : ''} />
+                        : addressToString(companyProfile.billingAddress)} />
                     <InfoRow label="お支払い方法" value={isEditing ? 
                         <EditableValue name="paymentMethod"><select name="paymentMethod" value={editedProfile.paymentMethod} onChange={handleChange} className={selectClass('paymentMethod')}>
                             <option value="credit_card">クレジットカード</option>

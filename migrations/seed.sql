@@ -16,11 +16,11 @@ INSERT OR IGNORE INTO clients (id, company_name, company_name_kana, contact_pers
 -- Insert Demo Admin User (superadmin@smartpolis.jp / password: admin123)
 -- Password hash for 'admin123' using bcrypt
 INSERT OR IGNORE INTO users (id, email, password_hash, name, role, is_active) VALUES
-(1, 'superadmin@smartpolis.jp', '$2a$10$rH5P9xK8.VvNj7YZqZ.F5O7qW5x9JqZqZqZqZqZqZqZqZqZqZqZqZ', 'システム管理者', 'SUPERADMIN', 1);
+(1, 'superadmin@smartpolis.jp', '$2a$10$X577g8YXBOSwvx2oiBTWjOGzmiaxeAxI7Xo859d7vDm8RWRAW2eb6', 'システム管理者', 'SUPERADMIN', 1);
 
 -- Insert Demo Client User (yamada@abc-shoji.co.jp / password: client123)
 INSERT OR IGNORE INTO users (id, email, password_hash, name, role, client_id, is_active) VALUES
-(2, 'yamada@abc-shoji.co.jp', '$2a$10$rH5P9xK8.VvNj7YZqZ.F5O7qW5x9JqZqZqZqZqZqZqZqZqZqZqZqZ', '山田太郎', 'CLIENTADMIN', 1, 1);
+(2, 'yamada@abc-shoji.co.jp', '$2a$10$fvMVCwEEBF29Xz1FQbCQ4.FHwG3F9VdfLnh0aAsQsxae84W9aQUSy', '山田太郎', 'CLIENTADMIN', 1, 1);
 
 -- Insert Demo Staff
 INSERT OR IGNORE INTO staff (id, user_id, real_name, business_name, display_name_type, email, role, position, phone, profile, status, approval_status, assigned_clients, joined_date) VALUES

@@ -30,7 +30,7 @@ const ClientDetailView: React.FC = () => {
 
     useEffect(() => {
         if(client) {
-            setEditedClient(client);
+            setEditedClient(JSON.parse(JSON.stringify(client))); // Deep copy to avoid state mutation issues
         }
     }, [client, isEditing]);
 
@@ -102,7 +102,7 @@ const ClientDetailView: React.FC = () => {
         </div>
     );
     const InfoField: React.FC<{label: string, value: React.ReactNode}> = ({ label, value }) => (
-        <div><label className="block text-xs font-medium text-gray-500">{label}</label><div className="text-sm text-gray-800">{value}</div></div>
+        <div><label className="block text-xs font-medium text-gray-500">{label}</label><div className="text-sm text-gray-800">{value || <span className="text-gray-400">未設定</span>}</div></div>
     );
 
     return (
@@ -144,8 +144,7 @@ const ClientDetailView: React.FC = () => {
                             <InfoSection title="法人基本情報" icon="fa-building">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <InfoField label="企業名" value={isEditing ? <input type="text" name="companyName" value={editedClient.companyName} onChange={handleInputChange} className={inputClass} /> : client.companyName} />
-                                    {/* FIX: Handle optional property `companyNameKana` with `|| ''` */}
-                                    <InfoField label="企業名カナ" value={isEditing ? <input type="text" name="companyNameKana" value={editedClient.companyNameKana || ''} onChange={handleInputChange} className={inputClass} /> : client.companyNameKana || ''} />
+                                    <InfoField label="企業名カナ" value={isEditing ? <input type="text" name="companyNameKana" value={editedClient.companyNameKana || ''} onChange={handleInputChange} className={inputClass} /> : client.companyNameKana} />
                                     <InfoField label="法人番号" value={isEditing ? <input type="text" name="corporateNumber" value={editedClient.corporateNumber} onChange={handleInputChange} className={inputClass} /> : client.corporateNumber} />
                                     <InfoField label="電話番号" value={isEditing ? <input type="text" name="phone" value={editedClient.phone} onChange={handleInputChange} className={inputClass} /> : client.phone} />
                                     <div className="md:col-span-2">
@@ -165,35 +164,75 @@ const ClientDetailView: React.FC = () => {
                              <InfoSection title="主担当者情報" icon="fa-user">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                      <InfoField label="氏名" value={primaryContact?.name} />
-                                     {/* FIX: Handle optional properties `familyNameKana` and `givenNameKana` */}
                                      <InfoField label="氏名カナ" value={`${primaryContact?.familyNameKana || ''} ${primaryContact?.givenNameKana || ''}`} />
-                                     {/* FIX: Handle optional property `department` with `|| ''` */}
                                      <InfoField label="部署" value={primaryContact?.department || ''} />
                                      <InfoField label="役職" value={primaryContact?.position} />
                                      <InfoField label="メールアドレス" value={primaryContact?.email} />
                                      <InfoField label="直通電話" value={primaryContact?.phone} />
                                 </div>
                             </InfoSection>
+                            
+                            <InfoSection title="登記・代表者情報" icon="fa-file-alt">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <InfoField label="登記上の商号" value={isEditing ? <input name="registeredName" value={editedClient.registeredName || ''} onChange={handleInputChange} className={inputClass}/> : client.registeredName} />
+                                    <InfoField label="代表者氏名" value={isEditing ? <input name="repName" value={editedClient.repName || ''} onChange={handleInputChange} className={inputClass}/> : client.repName} />
+                                    <InfoField label="代表者役職" value={isEditing ? <input name="repTitle" value={editedClient.repTitle || ''} onChange={handleInputChange} className={inputClass}/> : client.repTitle} />
+                                </div>
+                            </InfoSection>
 
                             <InfoSection title="請求先情報" icon="fa-file-invoice">
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* FIX: Handle optional property `billingName` with `|| ''` */}
-                                    <InfoField label="請求先名称" value={isEditing ? <input type="text" name="billingName" value={editedClient.billingName || ''} onChange={handleInputChange} className={inputClass} /> : client.billingName || ''} />
-                                    {/* FIX: Handle optional property `billingPhone` with `|| ''` */}
-                                    <InfoField label="請求先電話番号" value={isEditing ? <input type="text" name="billingPhone" value={editedClient.billingPhone || ''} onChange={handleInputChange} className={inputClass} /> : client.billingPhone || ''} />
-                                    <div className="md:col-span-2">
-                                        <InfoField label="請求先住所" value={isEditing ? 
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <input placeholder="郵便番号" name="billingAddress.postalCode" value={editedClient.billingAddress?.postalCode || ''} onChange={handleInputChange} className={inputClass}/>
-                                                <input placeholder="都道府県" name="billingAddress.prefecture" value={editedClient.billingAddress?.prefecture || ''} onChange={handleInputChange} className={inputClass}/>
-                                                <input placeholder="市区町村" name="billingAddress.city" value={editedClient.billingAddress?.city || ''} onChange={handleInputChange} className={inputClass}/>
-                                                <input placeholder="番地・ビル名" name="billingAddress.address1" value={editedClient.billingAddress?.address1 || ''} onChange={handleInputChange} className={inputClass}/>
-                                            </div>
-                                            : client.billingAddress ? `${client.billingAddress.postalCode} ${client.billingAddress.prefecture}${client.billingAddress.city}${client.billingAddress.address1}`: '法人住所と同じ'} 
-                                        />
-                                    </div>
+                                    <InfoField label="請求先名称" value={isEditing ? <input type="text" name="billingName" value={editedClient.billingName || ''} onChange={handleInputChange} className={inputClass} /> : client.billingName} />
+                                    <InfoField label="請求先部署" value={isEditing ? <input name="billingDepartment" value={editedClient.billingDepartment || ''} onChange={handleInputChange} className={inputClass}/> : client.billingDepartment} />
+                                    <InfoField label="請求担当者" value={isEditing ? <input name="billingContactName" value={editedClient.billingContactName || ''} onChange={handleInputChange} className={inputClass}/> : client.billingContactName} />
+                                    <InfoField label="請求担当者メール" value={isEditing ? <input name="billingContactEmail" value={editedClient.billingContactEmail || ''} onChange={handleInputChange} className={inputClass}/> : client.billingContactEmail} />
                                 </div>
                             </InfoSection>
+                            
+                             <InfoSection title="危機管理情報" icon="fa-shield-alt">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <InfoField label="危機管理責任者" value={isEditing ? <input name="riskManagementOfficerName" value={editedClient.riskManagementOfficerName || ''} onChange={handleInputChange} className={inputClass}/> : client.riskManagementOfficerName} />
+                                    {/* FIX: Handle emergencyContact object for display and editing. It was previously causing type errors. */}
+                                    <InfoField 
+                                        label="緊急連絡先" 
+                                        value={isEditing ? (
+                                            <div className="space-y-1">
+                                                <input 
+                                                    name="emergencyContact.day" 
+                                                    value={editedClient.emergencyContact?.day || ''} 
+                                                    onChange={handleInputChange} 
+                                                    className={inputClass}
+                                                    placeholder="昼間"
+                                                />
+                                                <input 
+                                                    name="emergencyContact.night" 
+                                                    value={editedClient.emergencyContact?.night || ''} 
+                                                    onChange={handleInputChange} 
+                                                    className={inputClass}
+                                                    placeholder="夜間"
+                                                />
+                                                <input 
+                                                    name="emergencyContact.holiday" 
+                                                    value={editedClient.emergencyContact?.holiday || ''} 
+                                                    onChange={handleInputChange} 
+                                                    className={inputClass}
+                                                    placeholder="休日"
+                                                />
+                                            </div>
+                                        ) : (
+                                            client.emergencyContact ? 
+                                            [
+                                                client.emergencyContact.day ? `昼: ${client.emergencyContact.day}` : null,
+                                                client.emergencyContact.night ? `夜間: ${client.emergencyContact.night}` : null,
+                                                client.emergencyContact.holiday ? `休日: ${client.emergencyContact.holiday}` : null
+                                            ].filter(Boolean).join(', ')
+                                            : undefined
+                                        )} 
+                                    />
+                                    <InfoField label="過去の重大トラブル概要" value={isEditing ? <textarea name="pastIncidentsSummary" value={editedClient.pastIncidentsSummary || ''} onChange={handleInputChange} className={inputClass} rows={3}/> : client.pastIncidentsSummary} />
+                                </div>
+                             </InfoSection>
+
                              {canDelete && isEditing && (
                                      <button onClick={handleDelete} className="w-full mt-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">このクライアントを削除</button>
                                 )}

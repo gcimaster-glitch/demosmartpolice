@@ -1,6 +1,4 @@
-
 import React from 'react';
-// Fix: Removed 'Doughnut' from import as it's not a named export from 'recharts'. Doughnut charts are created using PieChart with an innerRadius.
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Reports: React.FC = () => {

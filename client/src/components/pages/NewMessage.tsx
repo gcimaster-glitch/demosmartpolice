@@ -10,7 +10,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const NewMessage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { createTicket, consumeTicket } = useClientData();
+    const { createTicket } = useClientData();
     
     const [subject, setSubject] = useState('');
     const [priority, setPriority] = useState<'高' | '中' | '低'>('中');
@@ -61,8 +61,6 @@ const NewMessage: React.FC = () => {
             attachmentCount: files.length
         });
 
-        // FIX: The createTicket function already handles ticket consumption.
-        // The call below was redundant and caused an error due to missing arguments.
         if (newId === -1) {
             return; // createTicket already shows an alert on failure.
         }

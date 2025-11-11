@@ -4,11 +4,24 @@ import { useClientData } from '../../ClientDataContext.tsx';
 import type { TicketConsumptionLog } from '../../types.ts';
 
 const TicketHistory: React.FC = () => {
-    const { ticketConsumptionLog, currentClient } = useClientData();
+    const { ticketConsumptionLog, currentClient, currentPlan } = useClientData();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const ticketsPerPage = 10;
+
+    const consumedThisMonth = useMemo(() => {
+        if (!currentClient) return 0;
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        return ticketConsumptionLog
+            .filter(log =>
+                log.clientId === currentClient.id &&
+                new Date(log.date) >= firstDayOfMonth
+            )
+            .reduce((sum, log) => sum + log.ticketCost, 0);
+    }, [ticketConsumptionLog, currentClient]);
 
     const clientLog = useMemo(() => {
         if (!currentClient) return [];
@@ -67,8 +80,24 @@ const TicketHistory: React.FC = () => {
             </nav>
             <div className="mb-6">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">チケット管理</h2>
-                <p className="text-secondary">チケットの消費履歴です。</p>
+                <p className="text-secondary">チケットの残数と消費履歴をご確認いただけます。</p>
             </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center border-l-4 border-primary">
+                <div>
+                    <p className="text-sm text-gray-500">今月の付与チケット</p>
+                    <p className="text-2xl font-bold text-gray-800">{currentPlan?.monthlyTickets || 0}枚</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">今月の消費チケット</p>
+                    <p className="text-2xl font-bold text-red-500">{consumedThisMonth}枚</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">現在の残りチケット</p>
+                    <p className="text-3xl font-bold text-green-600">{currentClient?.remainingTickets || 0}枚</p>
+                </div>
+            </div>
+
              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="p-4 border-b">
                      <input
@@ -120,6 +149,15 @@ const TicketHistory: React.FC = () => {
                     <span className="text-sm text-gray-600">ページ {currentPage} / {totalPages}</span>
                     <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md text-sm disabled:opacity-50">次へ</button>
                 </div>
+            </div>
+
+            <div className="mt-8 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
+                <h3 className="font-bold mb-2 flex items-center"><i className="fas fa-info-circle mr-2"></i>チケット消費について</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                    <li>新規相談: 1チケット消費</li>
+                    <li>専門家招聘 (弁護士、公認会計士など): 1チケット消費</li>
+                    <li>オンラインで開催されるセミナー・イベントへの参加: 1チケット消費</li>
+                </ul>
             </div>
         </div>
     );

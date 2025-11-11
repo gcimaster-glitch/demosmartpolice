@@ -20,7 +20,7 @@ const AdminSidebar: React.FC = () => {
         { to: "/app", icon: "fa-tachometer-alt", label: "ダッシュボード", permission: 'VIEW_DASHBOARD' },
         { to: "/app/clients", icon: "fa-building", label: "クライアント管理", permission: 'VIEW_CLIENTS' },
         { to: "/app/staff", icon: "fa-users-cog", label: "担当者管理", permission: 'VIEW_STAFF' },
-        { to: "/app/tickets", icon: "fa-inbox", label: "相談チケット管理", permission: 'VIEW_TICKETS' },
+        { to: "/app/tickets", icon: "fa-inbox", label: "相談管理", permission: 'VIEW_TICKETS' },
         { to: "/app/ticket-history", icon: "fa-history", label: "チケット管理", permission: 'VIEW_TICKETS' },
         { to: "/app/applications", icon: "fa-file-signature", label: "申込管理", permission: 'VIEW_APPLICATIONS' },
         { to: "/app/announcements", icon: "fa-bullhorn", label: "お知らせ管理", permission: 'VIEW_ANNOUNCEMENTS' },

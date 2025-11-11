@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useAuth } from '../../AuthContext.tsx';
 import { useClientData } from '../../ClientDataContext.tsx';
@@ -37,15 +38,15 @@ const UserEditorModal: React.FC<{
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg fade-in" onClick={e => e.stopPropagation()}>
-                <div className="p-6 border-b"><h3 className="text-lg font-bold">{isCreating ? '新規ユーザー追加' : 'ユーザー編集'}</h3></div>
+                <div className="p-6 border-b"><h3 className="text-lg font-bold text-gray-900">{isCreating ? '新規ユーザー追加' : 'ユーザー編集'}</h3></div>
                 <div className="p-6 space-y-4">
-                    <div><label>氏名</label><input type="text" name="name" value={formData.name} onChange={handleChange} className={inputClass} /></div>
-                    <div><label>メールアドレス</label><input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700">氏名</label><input type="text" name="name" value={formData.name} onChange={handleChange} className={inputClass + " mt-1"} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700">メールアドレス</label><input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass + " mt-1"} /></div>
                     {/* FIX: Use `|| ''` to prevent uncontrolled component warning when `department` is optional and undefined. */}
-                    <div><label>部署</label><input type="text" name="department" value={formData.department || ''} onChange={handleChange} className={inputClass} /></div>
-                    <div><label>役職</label><input type="text" name="position" value={formData.position} onChange={handleChange} className={inputClass} /></div>
-                    <div><label>電話番号</label><input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} /></div>
-                    <div className="flex items-center"><input type="checkbox" name="isPrimaryContact" id="isPrimaryContact" checked={formData.isPrimaryContact} onChange={handleChange} className="h-4 w-4" /><label htmlFor="isPrimaryContact" className="ml-2">主担当者にする</label></div>
+                    <div><label className="block text-sm font-medium text-gray-700">部署</label><input type="text" name="department" value={formData.department || ''} onChange={handleChange} className={inputClass + " mt-1"} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700">役職</label><input type="text" name="position" value={formData.position} onChange={handleChange} className={inputClass + " mt-1"} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700">電話番号</label><input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass + " mt-1"} /></div>
+                    <div className="flex items-center pt-2"><input type="checkbox" name="isPrimaryContact" id="isPrimaryContact" checked={formData.isPrimaryContact} onChange={handleChange} className="h-4 w-4" /><label htmlFor="isPrimaryContact" className="ml-2 text-sm font-medium text-gray-700">主担当者にする</label></div>
                 </div>
                 <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
                     <button onClick={onClose} className="px-4 py-2 border rounded-md">キャンセル</button>
@@ -128,19 +129,19 @@ const Users: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-6 py-3 text-left">氏名</th><th className="px-6 py-3 text-left">役職</th><th className="px-6 py-3 text-left">連絡先</th><th className="px-6 py-3 text-left">役割</th><th className="px-6 py-3 text-left">アクション</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">氏名</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">役職</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">連絡先</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">役割</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">アクション</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {clientSideUsers.map(u => (
                             <tr key={u.id}>
                                 <td className="px-6 py-4">
-                                    <div className="font-medium">{u.name}</div>
+                                    <div className="font-medium text-gray-900">{u.name}</div>
                                     {u.isPrimaryContact && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">主担当者</span>}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{u.position}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700"><div>{u.email}</div><div>{u.phone}</div></td>
-                                <td className="px-6 py-4 text-sm">{u.role === 'CLIENTADMIN' ? '管理者' : '担当者'}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{u.role === 'CLIENTADMIN' ? '管理者' : '担当者'}</td>
                                 <td className="px-6 py-4 text-sm space-x-4">
                                     <button onClick={() => { setEditingUser(u); setModalOpen(true); }} className="text-blue-600 hover:text-blue-800">編集</button>
                                     <button onClick={() => handleDelete(u.id)} className="text-red-600 hover:text-red-800">削除</button>

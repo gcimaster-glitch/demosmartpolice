@@ -1,6 +1,4 @@
-
 import React, { useState, useMemo } from 'react';
-// FIX: Add `useLocation` to imports to resolve error.
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Invoice, InvoiceItem, Client } from '../../../types';
 import { useClientData } from '../../../ClientDataContext.tsx';

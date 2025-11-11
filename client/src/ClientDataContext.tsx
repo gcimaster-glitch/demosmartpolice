@@ -216,6 +216,7 @@ interface ClientDataContextType {
     // Functions
     hasPermission: (permission: Permission) => boolean;
     hasClientPermission: (permission: ClientPermission) => boolean;
+    calculateClientProfileCompletion: (client: Client) => number;
     updateRolePermissions: (roleName: UserRole, permissions: Permission[]) => void;
     logAction: (action: string, details: string, clientId?: number) => void;
     registerClient: (data: any, type: 'easy' | 'detailed' | 'simple') => Promise<boolean>;
@@ -330,6 +331,32 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
         if (!currentPlan) return false;
         return currentPlan.permissions.includes(permission);
     }, [currentPlan]);
+
+    const calculateClientProfileCompletion = useCallback((client: Client): number => {
+        const fieldsToCheck: (string | boolean | undefined | null)[] = [
+            client.registeredName,
+            client.repName,
+            client.businessOverview,
+            client.billingContactName,
+            client.riskManagementOfficerName,
+            (client.emergencyContact?.day || client.emergencyContact?.night || client.emergencyContact?.holiday),
+            client.hasBcp,
+            client.hasAntisocialExclusionClause
+        ];
+
+        const totalFields = fieldsToCheck.length;
+        let completedFields = 0;
+
+        fieldsToCheck.forEach(field => {
+            if (typeof field === 'string' && field.trim() !== '') {
+                completedFields++;
+            } else if (typeof field === 'boolean') {
+                completedFields++;
+            }
+        });
+
+        return totalFields > 0 ? (completedFields / totalFields) * 100 : 100;
+    }, []);
     
     const updateRolePermissions = (roleName: UserRole, permissions: Permission[]) => {
         setRoles(prevRoles => prevRoles.map(role => role.name === roleName ? { ...role, permissions } : role));
@@ -337,34 +364,79 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
     };
     
     const registerClient = async (data: any, type: 'easy' | 'detailed' | 'simple'): Promise<boolean> => {
-        console.log('Registering client', { data, type });
-        // In a real app, this would make a backend call.
-        // For now, just simulate success.
         const newClientId = Math.max(0, ...clients.map(c => c.id)) + 1;
+        const planId = type === 'detailed' ? data.contract_plan : FREE_PLAN_ID;
+        const plan = plans.find(p => p.id === planId);
+    
         const newClient: Client = {
-          id: newClientId,
-          companyName: data.company_name || data.company,
-          contactPerson: data.family_name ? `${data.family_name} ${data.given_name}` : data.name,
-          email: data.email,
-          planId: data.contract_plan || FREE_PLAN_ID,
-          status: 'active',
-          mainAssigneeId: null,
-          subAssigneeId: null,
-          registrationDate: new Date().toISOString().split('T')[0],
-          address: {
-            postalCode: data.postal_code || '',
-            prefecture: data.prefecture || '',
-            city: data.city || '',
-            address1: data.address || '',
-            address2: '',
-          },
-          corporateNumber: data.company_registration_number || '',
-          website: '',
-          phone: data.phone || '',
-          paymentMethod: 'credit_card',
-          remainingTickets: plans.find(p => p.id === (data.contract_plan || FREE_PLAN_ID))?.initialTickets || 0,
+            id: newClientId,
+            companyName: data.company_name || data.company,
+            companyNameKana: data.company_name_kana,
+            contactPerson: `${data.family_name || ''} ${data.given_name || ''}`.trim() || data.name,
+            email: data.email,
+            mainEmail: data.email,
+            planId: planId,
+            status: 'active',
+            mainAssigneeId: null,
+            subAssigneeId: null,
+            registrationDate: new Date().toISOString().split('T')[0],
+            address: {
+                postalCode: data.postal_code || '',
+                prefecture: data.prefecture || '',
+                city: data.city || '',
+                address1: data.address || '',
+                address2: '',
+            },
+            corporateNumber: data.company_registration_number || '',
+            website: '',
+            phone: data.phone || '',
+            mainTel: data.phone || '',
+            paymentMethod: data.payment_method || 'credit_card',
+            remainingTickets: plan?.initialTickets || 0,
+            registrationStatus: '基本情報完了',
+            createdAt: new Date().toISOString(),
+            createdBy: 0, // Placeholder for admin ID
+            updatedAt: new Date().toISOString(),
+            updatedBy: 0, // Placeholder for admin ID
+            confidentialityLevel: '通常',
+            consentFlag: true,
+            billingName: data.billing_name,
+            billingAddress: {
+                postalCode: data.billing_postal_code || '',
+                prefecture: data.billing_prefecture || '',
+                city: data.billing_city || '',
+                address1: data.billing_address || '',
+                address2: '',
+            },
+            billingPhone: data.billing_phone,
+            cardNumber: data.card_number,
+            cardExpiry: data.card_expiry,
+            bankAccount: {
+                bankName: data.bank_name || '',
+                branchName: data.branch_name || '',
+                accountType: data.account_type || '普通',
+                accountNumber: data.account_number || '',
+                accountHolderName: data.account_holder_name || '',
+            },
+            affiliateId: data.referral_code || undefined,
         };
+    
+        const newClientUser: ClientUser = {
+            id: Math.max(0, ...clientUsers.map(u => u.id)) + 1,
+            clientId: newClientId,
+            name: newClient.contactPerson,
+            email: newClient.email,
+            position: data.position || '主担当者',
+            phone: data.user_phone || data.phone || '',
+            isPrimaryContact: true,
+            role: 'CLIENTADMIN',
+            department: data.department,
+            familyNameKana: data.family_name_kana,
+            givenNameKana: data.given_name_kana,
+        };
+
         setClients(prev => [...prev, newClient]);
+        setClientUsers(prev => [...prev, newClientUser]);
         logAction('REGISTER_CLIENT', `New client registered: ${newClient.companyName}`, newClientId);
         return new Promise(resolve => setTimeout(() => resolve(true), 500));
     };
@@ -836,7 +908,7 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const value: ClientDataContextType = {
         tickets, announcements, seminars, events, materials, services, invoices, serviceApplications, staff, clients, clientUsers, auditLogs, roles, plans, affiliates, referrals, payouts, ticketConsumptionLog, currentClient, currentPlan,
-        hasPermission, hasClientPermission, updateRolePermissions, logAction, registerClient, updateTicketStatus, consumeTicket, createTicket, markAnnouncementAsRead, applyForSeminar, getSeminarApplicationStatus, deleteSeminarApplication, applyForEvent, getEventApplicationStatus, deleteEventApplication, applyForService, processApplication, saveStaff, deleteStaff, approveStaff, saveClient, deleteClient, changeClientPlan, createInvoice, deleteInvoice, createService, updateService, deleteService, saveAnnouncement, deleteAnnouncement, saveSeminar, deleteSeminar, saveEvent, deleteEvent, savePlan, deletePlan, addMaterial, updateMaterial, deleteMaterial,
+        hasPermission, hasClientPermission, calculateClientProfileCompletion, updateRolePermissions, logAction, registerClient, updateTicketStatus, consumeTicket, createTicket, markAnnouncementAsRead, applyForSeminar, getSeminarApplicationStatus, deleteSeminarApplication, applyForEvent, getEventApplicationStatus, deleteEventApplication, applyForService, processApplication, saveStaff, deleteStaff, approveStaff, saveClient, deleteClient, changeClientPlan, createInvoice, deleteInvoice, createService, updateService, deleteService, saveAnnouncement, deleteAnnouncement, saveSeminar, deleteSeminar, saveEvent, deleteEvent, savePlan, deletePlan, addMaterial, updateMaterial, deleteMaterial,
         getStaffDisplayName, addClientUser, updateClientUser, deleteClientUser, approveReferral, rejectReferral, saveAffiliate, deleteAffiliate, requestPayout, markPayoutAsPaid
     };
 

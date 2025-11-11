@@ -187,16 +187,29 @@ export interface ClientUser {
   phone: string;
   isPrimaryContact: boolean;
   role: 'CLIENTADMIN' | 'CLIENT';
-  // FIX: Add missing optional fields to align with form states
   department?: string;
   familyNameKana?: string;
   givenNameKana?: string;
+  dateOfBirth?: string;
+  mobileTel?: string;
+  preferredContactMethod?: '電話優先' | 'メール優先' | 'チャット';
+  contactAvailableTime?: string;
+  loginId?: string; // Future use
+  identityVerifiedFlag?: boolean;
+}
+
+export interface Officer {
+  id: string;
+  name: string;
+  title: string;
+  responsibility?: string;
+  isRiskOwner?: boolean;
 }
 
 export interface Client {
+  // Existing fields from provided file
   id: number;
   companyName: string;
-  // FIX: Add missing optional fields to align with form states
   companyNameKana?: string;
   contactPerson: string;
   email: string;
@@ -213,18 +226,112 @@ export interface Client {
   notes?: string;
   remainingTickets: number;
   affiliateId?: string;
-  // FIX: Added missing fields to align with CompanyInfo.tsx component.
   establishmentDate?: string;
   capital?: string;
   businessDescription?: string;
   employeeCount?: string;
   billingAddress?: Address;
-  // FIX: Add missing optional fields to align with form states
   billingName?: string;
   billingPhone?: string;
   cardNumber?: string;
   cardExpiry?: string;
+
+  // NEW fields from spec, all optional for safety
+  // 2-1. System Meta
+  registrationStatus?: '仮登録' | '基本情報完了' | '詳細情報入力中' | '完全登録';
+  createdAt?: string;
+  createdBy?: number; // Staff ID
+  updatedAt?: string;
+  updatedBy?: number; // Staff ID
+  contractStartDate?: string;
+  contractEndDate?: string;
+  renewalDueDate?: string;
+  terminatedAt?: string;
+  confidentialityLevel?: '通常' | '要注意' | '取扱い制限あり';
+  consentFlag?: boolean;
+
+  // 2-2. Basic Company Info
+  companyNameEn?: string;
+  mainTel?: string;
+  fax?: string;
+  mainEmail?: string;
+  websiteUrl?: string;
+  industry?: { main?: string; sub?: string; detail?: string };
+  listingStatus?: '上場' | '未上場' | '公的機関';
+  numEmployees?: number; // Can replace employeeCount string
+  hasMultipleLocations?: boolean;
+
+  // 2-4. Registration Info
+  registeredName?: string;
+  registeredAddress?: Address;
+  regDocAcquiredAt?: string;
+  regCheckedBy?: number; // Staff ID
+  majorShareholdersSummary?: string;
+  hasGroupCompany?: boolean;
+  
+  // 2-5. Representative & Officer Info
+  repName?: string;
+  repNameKana?: string;
+  repTitle?: string;
+  repDateOfBirth?: string;
+  repContactTel?: string;
+  repContactEmail?: string;
+  repTermStart?: string;
+  repTermEnd?: string;
+  officers?: Officer[];
+
+  // 2-6. Business Structure
+  businessOverview?: string; // Replaces businessDescription
+  businessDomains?: string[];
+  customerTypes?: string[];
+  salesChannels?: string[];
+  mainLocations?: string;
+  hasOverseasBusiness?: boolean;
+  handlesPersonalData?: boolean;
+  handlesSensitiveData?: boolean;
+  isCriticalInfrastructure?: boolean;
+  saasUsageSummary?: string;
+  
+  // 2-7. Product/Service Info
+  productsServicesList?: string;
+  hasHighRiskProduct?: boolean;
+  hasRegulatedProduct?: boolean;
+  serviceAreas?: string;
+  
+  // 2-8. Billing Info (extended)
+  billingDepartment?: string;
+  billingContactName?: string;
+  billingContactEmail?: string;
+  billingMethod?: '郵送' | 'PDFメール' | '電子インボイス';
+  bankAccount?: BankAccount;
+  closingDay?: string; // e.g., '月末', '20日'
+  paymentDay?: string; // e.g., '翌月末'
+  invoiceRegistrationNumber?: string;
+  fiscalMonth?: number;
+
+  // 2-9. Risk Management Info
+  riskManagementOfficerName?: string;
+  riskOfficerContact?: string;
+  emergencyContact?: { day: string; night: string; holiday: string; };
+  hasBcp?: boolean;
+  bcpDocumentLocation?: string;
+  hasCompanyPolicies?: boolean;
+  hasAntisocialExclusionClause?: boolean;
+  hasPastIncidents?: boolean;
+  pastIncidentsSummary?: string;
+  prContactName?: string;
+  prContactEmail?: string;
+  hasLegalCounsel?: boolean;
+  legalCounselInfo?: string;
+
+  // 2-10. Communication History
+  firstContactDate?: string;
+  lastContactDate?: string;
+  internalOwnerId?: number; // Staff ID
+  nextActionDate?: string;
+  tags?: string[];
 }
+
 
 export interface StaffPersonalInfo {
   dateOfBirth: string;

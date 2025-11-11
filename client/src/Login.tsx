@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext.tsx';
 import { useNavigate, Link } from 'react-router-dom';
 
+// Demo accounts for easy login
 const easyLoginUsers = {
-    'admin@client.com': { password: 'password', role: 'クライアント管理者' },
-    'staff@smartpolice.jp': { password: 'password', role: '担当者 (SP)' },
-    'superadmin@smartpolice.jp': { password: 'password', role: '最高管理者' },
-    'yamada@referral.com': { password: 'password', role: 'アフィリエイト' },
+    'superadmin@smartpolis.jp': { password: 'admin123', role: 'システム管理者' },
+    'yamada@abc-shoji.co.jp': { password: 'client123', role: 'クライアント管理者' },
 };
 
 // Fix: Changed component to be a named export to resolve module loading error.
 export const Login: React.FC = () => {
-    const [email, setEmail] = useState('admin@client.com');
-    const [password, setPassword] = useState('password');
+    const [email, setEmail] = useState('superadmin@smartpolis.jp');
+    const [password, setPassword] = useState('admin123');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const auth = useAuth();
@@ -36,7 +35,7 @@ export const Login: React.FC = () => {
         if (success) {
             navigate('/app');
         } else {
-            setError('メールアドレスまたはパスワードが正しくありません。');
+            setError(auth.error || 'メールアドレスまたはパスワードが正しくありません。');
         }
     };
     
@@ -51,8 +50,8 @@ export const Login: React.FC = () => {
     const handleGoogleLogin = async () => {
         setIsLoading(true);
         setError('');
-        // Simulate Google login by using a pre-defined demo user
-        const success = await auth.login('admin@client.com', 'password');
+        // Demo: Use default admin account
+        const success = await auth.login('superadmin@smartpolis.jp', 'admin123');
         setIsLoading(false);
         if (success) {
             navigate('/app');

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Announcement } from '../../../types.ts';
-// Fix: Add '.tsx' extension to the import path for ClientDataContext.
 import { useClientData } from '../../../ClientDataContext.tsx';
 
 const initialFormState: Partial<Omit<Announcement, 'id' | 'read' | 'createdAt'>> = {

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// Fix: Add '.tsx' extension to the import path for ClientDataContext.
 import { useClientData } from '../../ClientDataContext.tsx';
 import type { Invoice } from '../../types.ts';
 

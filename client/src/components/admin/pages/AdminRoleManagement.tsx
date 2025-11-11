@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useClientData } from '../../../ClientDataContext.tsx';
@@ -20,7 +19,6 @@ const permissionGroups: { group: string; permissions: { id: Permission; label: s
     { group: 'プラン管理', permissions: [{ id: 'MANAGE_PLANS', label: '編集' }] },
 ];
 
-// FIX: Add 'AFFILIATE' to the role map to satisfy the UserRole type
 const roleNameMap: Record<UserRole, string> = {
     'SUPERADMIN': '最高管理者', 'ADMIN': '管理者', 'STAFF': '担当者', 'CLIENTADMIN': 'クライアント管理者', 'CLIENT': 'クライアント', 'AFFILIATE': 'アフィリエイト'
 };

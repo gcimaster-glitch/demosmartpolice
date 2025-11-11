@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, Link, useParams, useNavigate } from 'react-router-dom';
-import MessagesList from './MessagesList.tsx';
+import MessagesList from './MessagesListIntegrated.tsx';
 
 const MessagesLayout: React.FC = () => {
     const location = useLocation();
@@ -14,7 +14,7 @@ const MessagesLayout: React.FC = () => {
             <>
                 <Link to="/app" className="hover:text-primary">ホーム</Link>
                 <span className="mx-2">＞</span>
-                <Link to="/app/messages" className={`hover:text-primary ${!isDetailView ? 'text-gray-900' : ''}`}>相談・連絡</Link>
+                <Link to="/app/messages" className={`hover:text-primary ${!isDetailView ? 'text-gray-900' : ''}`}>相談</Link>
 
                 {isDetailView && (
                     <>
@@ -37,11 +37,11 @@ const MessagesLayout: React.FC = () => {
             </nav>
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">相談・連絡</h2>
-                    <p className="text-secondary">お困りごとの相談や質問、報告などにご利用ください</p>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">相談</h2>
+                    <p className="text-secondary">お困りごとの相談や質問にご利用ください</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                    <button onClick={() => navigate('/app/tickets')} className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors focus-ring">
+                    <button onClick={() => navigate('/app/ticket-history')} className="bg-white text-primary border border-primary px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors focus-ring">
                         <i className="fas fa-history mr-2"></i>
                         チケット管理
                     </button>

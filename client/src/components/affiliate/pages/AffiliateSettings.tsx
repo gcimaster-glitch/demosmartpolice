@@ -5,7 +5,6 @@ import type { Affiliate } from '../../../types.ts';
 
 const AffiliateSettings: React.FC = () => {
     const { user } = useAuth();
-    // FIX: Destructure saveAffiliate from the context
     const { affiliates, saveAffiliate } = useClientData();
 
     const affiliate = useMemo(() => {
