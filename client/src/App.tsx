@@ -218,88 +218,88 @@ const ClientRoutes = () => (
 
 const AdminRoutes = () => (
      <Routes>
-        <Route element={<AdminLayout />}>
-            <Route path="/" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
             
-            <Route path="/clients" element={<AdminClientManagement />} />
-            <Route path="/clients/:id" element={<AdminClientManagement />} />
+            <Route path="clients" element={<AdminClientManagement />} />
+            <Route path="clients/:id" element={<AdminClientManagement />} />
             
-            <Route path="/staff" element={<AdminStaffManagement />} />
-            <Route path="/staff/new" element={<AdminStaffManagement />} />
-            <Route path="/staff/:id" element={<AdminStaffManagement />} />
+            <Route path="staff" element={<AdminStaffManagement />} />
+            <Route path="staff/new" element={<AdminStaffManagement />} />
+            <Route path="staff/:id" element={<AdminStaffManagement />} />
             
-            <Route path="/tickets" element={<AdminTicketManagement />} />
-            <Route path="/tickets/:id" element={<AdminTicketManagement />} />
-            <Route path="/ticket-history" element={<AdminTicketHistoryManagement />} />
+            <Route path="tickets" element={<AdminTicketManagement />} />
+            <Route path="tickets/:id" element={<AdminTicketManagement />} />
+            <Route path="ticket-history" element={<AdminTicketHistoryManagement />} />
 
-            <Route path="/applications" element={<AdminApplicationManagement />} />
-            <Route path="/applications/:id" element={<AdminApplicationManagement />} />
+            <Route path="applications" element={<AdminApplicationManagement />} />
+            <Route path="applications/:id" element={<AdminApplicationManagement />} />
 
-            <Route path="/announcements" element={<AdminAnnouncements />} />
-            <Route path="/announcements/new" element={<AdminAnnouncements />} />
-            <Route path="/announcements/:id" element={<AdminAnnouncements />} />
+            <Route path="announcements" element={<AdminAnnouncements />} />
+            <Route path="announcements/new" element={<AdminAnnouncements />} />
+            <Route path="announcements/:id" element={<AdminAnnouncements />} />
 
-            <Route path="/seminars" element={<AdminSeminarManagement />} />
-            <Route path="/seminars/new" element={<AdminSeminarManagement />} />
-            <Route path="/seminars/:id" element={<AdminSeminarManagement />} />
+            <Route path="seminars" element={<AdminSeminarManagement />} />
+            <Route path="seminars/new" element={<AdminSeminarManagement />} />
+            <Route path="seminars/:id" element={<AdminSeminarManagement />} />
             
-            <Route path="/events" element={<AdminEventManagement />} />
-            <Route path="/events/new" element={<AdminEventManagement />} />
-            <Route path="/events/:id" element={<AdminEventManagement />} />
+            <Route path="events" element={<AdminEventManagement />} />
+            <Route path="events/new" element={<AdminEventManagement />} />
+            <Route path="events/:id" element={<AdminEventManagement />} />
             
-            <Route path="/materials" element={<AdminMaterialsManagement />} />
-            <Route path="/materials/new" element={<AdminMaterialsManagement />} />
-            <Route path="/materials/:id" element={<AdminMaterialsManagement />} />
+            <Route path="materials" element={<AdminMaterialsManagement />} />
+            <Route path="materials/new" element={<AdminMaterialsManagement />} />
+            <Route path="materials/:id" element={<AdminMaterialsManagement />} />
 
-            <Route path="/billing" element={<AdminBillingManagement />} />
-            <Route path="/billing/new" element={<AdminBillingManagement />} />
-            <Route path="/billing/:id" element={<AdminBillingManagement />} />
+            <Route path="billing" element={<AdminBillingManagement />} />
+            <Route path="billing/new" element={<AdminBillingManagement />} />
+            <Route path="billing/:id" element={<AdminBillingManagement />} />
 
-            <Route path="/affiliates" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
-            <Route path="/affiliates/new" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
-            <Route path="/affiliates/:id" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="affiliates" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="affiliates/new" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="affiliates/:id" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
             
-            <Route path="/services" element={
+            <Route path="services" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="/services/new" element={
+             <Route path="services/new" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="/services/:id" element={
+             <Route path="services/:id" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
 
-             <Route path="/roles" element={
+             <Route path="roles" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminRoleManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="/roles/:roleName" element={
+             <Route path="roles/:roleName" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminRoleManagement />
                 </AdminProtectedRoute>
             } />
             
-            <Route path="/plans" element={
+            <Route path="plans" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminPlanManagement />
                 </AdminProtectedRoute>
             } />
 
-            <Route path="/logs" element={<AdminAuditLog />} />
+            <Route path="logs" element={<AdminAuditLog />} />
             
-            <Route path="/admin-settings" element={
+            <Route path="admin-settings" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}>
                     <AdminPlaceholderPage title="システム設定" />
                 </AdminProtectedRoute>
             } />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/app/admin" />} />
         </Route>
     </Routes>
 );
