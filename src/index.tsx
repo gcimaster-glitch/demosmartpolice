@@ -12,6 +12,9 @@ import clients from './routes/clients';
 import users from './routes/users';
 import billing from './routes/billing';
 import plans from './routes/plans';
+import services from './routes/services';
+import seminars from './routes/seminars';
+import events from './routes/events';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -33,6 +36,9 @@ app.route('/api/clients', clients);
 app.route('/api/users', users);
 app.route('/api/billing', billing);
 app.route('/api/plans', plans);
+app.route('/api/services', services);
+app.route('/api/seminars', seminars);
+app.route('/api/events', events);
 
 // Health check
 app.get('/api/health', (c) => {

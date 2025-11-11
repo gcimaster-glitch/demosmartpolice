@@ -321,6 +321,99 @@ export const plansAPI = {
 };
 
 // ============================================
+// Services API
+// ============================================
+
+export const servicesAPI = {
+  getAll: async (): Promise<any> => {
+    const response = await apiClient.get('/services');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/services/${id}`);
+    return response.data;
+  },
+
+  apply: async (data: {
+    serviceId: string;
+    notes?: string;
+    userName: string;
+    userEmail: string;
+  }): Promise<any> => {
+    const response = await apiClient.post('/services/apply', data);
+    return response.data;
+  },
+
+  getMyApplications: async (): Promise<any> => {
+    const response = await apiClient.get('/services/applications/my');
+    return response.data;
+  },
+};
+
+// ============================================
+// Seminars API
+// ============================================
+
+export const seminarsAPI = {
+  getAll: async (): Promise<any> => {
+    const response = await apiClient.get('/seminars');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/seminars/${id}`);
+    return response.data;
+  },
+
+  apply: async (data: {
+    seminarId: number;
+    notes?: string;
+    userName: string;
+    userEmail: string;
+  }): Promise<any> => {
+    const response = await apiClient.post('/seminars/apply', data);
+    return response.data;
+  },
+
+  getMyApplications: async (): Promise<any> => {
+    const response = await apiClient.get('/seminars/applications/my');
+    return response.data;
+  },
+};
+
+// ============================================
+// Events API
+// ============================================
+
+export const eventsAPI = {
+  getAll: async (): Promise<any> => {
+    const response = await apiClient.get('/events');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<any> => {
+    const response = await apiClient.get(`/events/${id}`);
+    return response.data;
+  },
+
+  apply: async (data: {
+    eventId: number;
+    notes?: string;
+    userName: string;
+    userEmail: string;
+  }): Promise<any> => {
+    const response = await apiClient.post('/events/apply', data);
+    return response.data;
+  },
+
+  getMyApplications: async (): Promise<any> => {
+    const response = await apiClient.get('/events/applications/my');
+    return response.data;
+  },
+};
+
+// ============================================
 // Error Handler
 // ============================================
 
