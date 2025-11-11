@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { clientsAPI, plansAPI } from '../../../services/apiClient.ts';
 
 interface Client {
@@ -24,7 +24,10 @@ interface Plan {
 }
 
 const AdminClientManagementIntegrated: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [clients, setClients] = useState<Client[]>([]);
+    const [clientDetail, setClientDetail] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,9 +39,13 @@ const AdminClientManagementIntegrated: React.FC = () => {
     const [changeReason, setChangeReason] = useState<string>('');
 
     useEffect(() => {
-        fetchClients();
+        if (id) {
+            fetchClientDetail(parseInt(id));
+        } else {
+            fetchClients();
+        }
         fetchPlans();
-    }, []);
+    }, [id]);
 
     const fetchClients = async () => {
         try {
@@ -52,6 +59,23 @@ const AdminClientManagementIntegrated: React.FC = () => {
         } catch (err) {
             console.error('Clients fetch error:', err);
             setError('クライアント一覧の読み込みに失敗しました');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchClientDetail = async (clientId: number) => {
+        try {
+            setLoading(true);
+            const response = await clientsAPI.getById(clientId);
+            if (response.success) {
+                setClientDetail(response.data);
+            } else {
+                setError(response.error || 'クライアント詳細の取得に失敗しました');
+            }
+        } catch (err) {
+            console.error('Client detail fetch error:', err);
+            setError('クライアント詳細の読み込みに失敗しました');
         } finally {
             setLoading(false);
         }
@@ -172,6 +196,184 @@ const AdminClientManagementIntegrated: React.FC = () => {
         );
     }
 
+    // 詳細表示モード
+    if (id && clientDetail) {
+        const client = clientDetail.client;
+        const plan = clientDetail.plan;
+
+        return (
+            <div className="fade-in">
+                <div className="mb-6 flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/app/admin/clients')}
+                        className="text-gray-600 hover:text-gray-900"
+                    >
+                        <i className="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">クライアント詳細</h1>
+                        <p className="text-gray-600 mt-2">{client.company_name}</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* 基本情報 */}
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">
+                            <i className="fas fa-building mr-2 text-primary"></i>
+                            基本情報
+                        </h2>
+                        <dl className="space-y-3">
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">企業名</dt>
+                                <dd className="mt-1 text-sm text-gray-900">{client.company_name}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">担当者</dt>
+                                <dd className="mt-1 text-sm text-gray-900">{client.contact_name}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">メールアドレス</dt>
+                                <dd className="mt-1 text-sm text-gray-900">{client.email}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">電話番号</dt>
+                                <dd className="mt-1 text-sm text-gray-900">{client.phone}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">登録日</dt>
+                                <dd className="mt-1 text-sm text-gray-900">
+                                    {new Date(client.registration_date).toLocaleDateString('ja-JP')}
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    {/* プラン・ステータス情報 */}
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">
+                            <i className="fas fa-chart-line mr-2 text-primary"></i>
+                            プラン・ステータス
+                        </h2>
+                        <dl className="space-y-3">
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">現在のプラン</dt>
+                                <dd className="mt-1 text-sm text-gray-900 font-medium">{plan?.name || client.plan_id}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">ステータス</dt>
+                                <dd className="mt-1">{getStatusBadge(client.status)}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-medium text-gray-500">残チケット数</dt>
+                                <dd className="mt-1 text-sm text-gray-900 font-bold">{client.remaining_tickets}枚</dd>
+                            </div>
+                        </dl>
+                        <div className="mt-6 flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setSelectedClient(client);
+                                    setSelectedPlanId(client.plan_id);
+                                    setChangeReason('');
+                                    setShowPlanModal(true);
+                                }}
+                                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                            >
+                                <i className="fas fa-exchange-alt mr-2"></i>
+                                プラン変更
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* プラン変更モーダル（詳細表示でも使用） */}
+                {showPlanModal && selectedClient && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-gray-900">
+                                    <i className="fas fa-exchange-alt mr-2"></i>
+                                    プラン変更
+                                </h2>
+                                <button
+                                    onClick={handleClosePlanModal}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i className="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="text-sm text-gray-600 mb-2">クライアント</p>
+                                <p className="font-medium text-gray-900">{selectedClient.company_name}</p>
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="text-sm text-gray-600 mb-2">現在のプラン</p>
+                                <p className="font-medium text-gray-900">
+                                    {plans.find(p => p.id === selectedClient.plan_id)?.name || selectedClient.plan_id}
+                                </p>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    新しいプラン <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={selectedPlanId}
+                                    onChange={(e) => setSelectedPlanId(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">選択してください</option>
+                                    {plans.map((planOption) => (
+                                        <option key={planOption.id} value={planOption.id}>
+                                            {planOption.name} - ¥{planOption.monthly_price.toLocaleString()}/月
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    変更理由
+                                </label>
+                                <textarea
+                                    value={changeReason}
+                                    onChange={(e) => setChangeReason(e.target.value)}
+                                    placeholder="プラン変更の理由を入力してください（任意）"
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                />
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleClosePlanModal}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        await handlePlanChange();
+                                        if (id) {
+                                            fetchClientDetail(parseInt(id));
+                                        }
+                                    }}
+                                    disabled={!selectedPlanId || selectedPlanId === selectedClient.plan_id}
+                                    className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    変更する
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // 一覧表示モード
     return (
         <div className="fade-in">
             <div className="mb-6">
@@ -266,7 +468,12 @@ const AdminClientManagementIntegrated: React.FC = () => {
                             filteredClients.map((client) => (
                                 <tr key={client.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{client.company_name}</div>
+                                        <Link 
+                                            to={`/app/admin/clients/${client.id}`}
+                                            className="text-sm font-medium text-primary hover:text-blue-700 hover:underline"
+                                        >
+                                            {client.company_name}
+                                        </Link>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{client.contact_name}</div>
