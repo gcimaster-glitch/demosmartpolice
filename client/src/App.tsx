@@ -43,7 +43,7 @@ import AIChatFAB from './components/AIChatFAB.tsx';
 import AdminSidebar from './components/admin/AdminSidebar.tsx';
 import AdminDashboard from './components/admin/pages/AdminDashboardIntegrated.tsx';
 import AdminClientManagement from './components/admin/pages/AdminClientManagement.tsx';
-import AdminStaffManagement from './components/admin/pages/AdminStaffManagement.tsx';
+import AdminStaffManagementSimple from './components/admin/pages/AdminStaffManagementSimple.tsx';
 import AdminTicketManagement from './components/admin/pages/AdminTicketManagementIntegrated.tsx';
 import AdminTicketHistoryManagement from './components/admin/pages/AdminTicketHistoryManagement.tsx';
 import AdminAnnouncements from './components/admin/pages/AdminAnnouncementsIntegrated.tsx';
@@ -225,9 +225,9 @@ const AdminRoutes = () => (
             <Route path="clients" element={<AdminClientManagement />} />
             <Route path="clients/:id" element={<AdminClientManagement />} />
             
-            <Route path="staff" element={<AdminStaffManagement />} />
-            <Route path="staff/new" element={<AdminStaffManagement />} />
-            <Route path="staff/:id" element={<AdminStaffManagement />} />
+            <Route path="staff" element={<AdminStaffManagementSimple />} />
+            <Route path="staff/new" element={<AdminStaffManagementSimple />} />
+            <Route path="staff/:id" element={<AdminStaffManagementSimple />} />
             
             <Route path="tickets" element={<AdminTicketManagement />} />
             <Route path="tickets/:id" element={<AdminTicketManagement />} />

@@ -13,6 +13,8 @@ interface Ticket {
     created_at: string;
     last_update: string;
     company_name?: string;
+    main_assignee_name?: string | null;
+    sub_assignee_name?: string | null;
 }
 
 const AdminTicketManagementIntegrated: React.FC = () => {
@@ -195,6 +197,9 @@ const AdminTicketManagementIntegrated: React.FC = () => {
                                 企業名
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                担当者
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 カテゴリ
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -223,6 +228,18 @@ const AdminTicketManagementIntegrated: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-600">{ticket.company_name || '-'}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-600">
+                                            {ticket.main_assignee_name ? (
+                                                <div className="flex items-center">
+                                                    <i className="fas fa-user-shield text-primary mr-1 text-xs"></i>
+                                                    {ticket.main_assignee_name}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400">未割り当て</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-600">{ticket.category}</div>
@@ -263,7 +280,7 @@ const AdminTicketManagementIntegrated: React.FC = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                                     {searchTerm || statusFilter !== 'all' 
                                         ? '検索条件に一致するチケットが見つかりません'
                                         : 'チケットがまだありません'

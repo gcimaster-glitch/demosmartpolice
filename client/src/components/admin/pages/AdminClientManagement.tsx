@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { clientsAPI, plansAPI } from '../../../services/apiClient.ts';
+import { clientsAPI, plansAPI, staffAPI } from '../../../services/apiClient.ts';
 
 // Type definitions matching backend API responses
 interface Client {
@@ -13,6 +13,8 @@ interface Client {
     plan_id: string;
     registration_date: string;
     remaining_tickets: number;
+    main_assignee_id?: number | null;
+    sub_assignee_id?: number | null;
     // Extended fields from detail API
     company_name_kana?: string;
     corporate_number?: string;
@@ -48,6 +50,15 @@ interface Plan {
     initial_tickets: number;
 }
 
+interface Staff {
+    id: number;
+    name: string;
+    real_name: string;
+    email: string;
+    role: string;
+    approval_status: string;
+}
+
 interface ClientDetailData {
     client: Client;
     users: any[];
@@ -69,6 +80,7 @@ const ClientDetailView: React.FC = () => {
     const [client, setClient] = useState<Client | null>(null);
     const [clientDetail, setClientDetail] = useState<ClientDetailData | null>(null);
     const [plans, setPlans] = useState<Plan[]>([]);
+    const [staff, setStaff] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editedClient, setEditedClient] = useState<Client | null>(null);
@@ -78,6 +90,7 @@ const ClientDetailView: React.FC = () => {
         if (id) {
             fetchClientDetail(parseInt(id));
             fetchPlans();
+            fetchStaff();
         }
     }, [id]);
 
@@ -113,6 +126,19 @@ const ClientDetailView: React.FC = () => {
         }
     };
 
+    const fetchStaff = async () => {
+        try {
+            const response = await staffAPI.getAll();
+            if (response.success) {
+                // Filter only approved staff
+                const approvedStaff = (response.data || []).filter((s: Staff) => s.approval_status === 'approved');
+                setStaff(approvedStaff);
+            }
+        } catch (err) {
+            console.error('Staff fetch error:', err);
+        }
+    };
+
     if (loading) {
         return <div className="text-center p-8">読み込み中...</div>;
     }
@@ -128,6 +154,7 @@ const ClientDetailView: React.FC = () => {
     const handleSave = async () => {
         if (editedClient && id) {
             try {
+                // Update basic client info
                 const response = await clientsAPI.update(parseInt(id), {
                     companyName: editedClient.company_name,
                     contactPerson: editedClient.contact_name,
@@ -135,10 +162,25 @@ const ClientDetailView: React.FC = () => {
                     phone: editedClient.phone,
                     status: editedClient.status,
                 });
+                
                 if (response.success) {
+                    // Update staff assignments if changed
+                    const mainChanged = editedClient.main_assignee_id !== client.main_assignee_id;
+                    const subChanged = editedClient.sub_assignee_id !== client.sub_assignee_id;
+                    
+                    if (mainChanged || subChanged) {
+                        await clientsAPI.assignStaff(
+                            parseInt(id), 
+                            editedClient.main_assignee_id, 
+                            editedClient.sub_assignee_id
+                        );
+                    }
+                    
                     setClient(editedClient);
                     setIsEditing(false);
                     alert('クライアント情報を更新しました');
+                    // Refresh to get updated data
+                    fetchClientDetail(parseInt(id));
                 }
             } catch (err) {
                 console.error('Save error:', err);
@@ -167,7 +209,12 @@ const ClientDetailView: React.FC = () => {
                 if (!currentLevel[keys[i]]) currentLevel[keys[i]] = {};
                 currentLevel = currentLevel[keys[i]];
             }
-            currentLevel[keys[keys.length - 1]] = value;
+            // Convert to number for assignee IDs, handle empty string as null
+            if (name === 'main_assignee_id' || name === 'sub_assignee_id') {
+                currentLevel[keys[keys.length - 1]] = value === '' ? null : parseInt(value);
+            } else {
+                currentLevel[keys[keys.length - 1]] = value;
+            }
             return newProfile;
         });
     };
@@ -356,6 +403,44 @@ const ClientDetailView: React.FC = () => {
 
                             <InfoSection title="危機管理情報" icon="fa-shield-alt">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <InfoField label="主担当者（危機管理官）" value={
+                                        isEditing ? (
+                                            <select 
+                                                name="main_assignee_id" 
+                                                value={editedClient.main_assignee_id || ''} 
+                                                onChange={handleInputChange} 
+                                                className={inputClass}
+                                            >
+                                                <option value="">未割り当て</option>
+                                                {staff.map(s => (
+                                                    <option key={s.id} value={s.id}>
+                                                        {s.real_name} ({s.role === 'CrisisManager' ? '危機管理官' : s.role === 'Consultant' ? 'コンサルタント' : s.role === 'Legal' ? '弁護士' : s.role})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            staff.find(s => s.id === client.main_assignee_id)?.real_name || '未割り当て'
+                                        )
+                                    } />
+                                    <InfoField label="副担当者（危機管理官）" value={
+                                        isEditing ? (
+                                            <select 
+                                                name="sub_assignee_id" 
+                                                value={editedClient.sub_assignee_id || ''} 
+                                                onChange={handleInputChange} 
+                                                className={inputClass}
+                                            >
+                                                <option value="">未割り当て</option>
+                                                {staff.map(s => (
+                                                    <option key={s.id} value={s.id}>
+                                                        {s.real_name} ({s.role === 'CrisisManager' ? '危機管理官' : s.role === 'Consultant' ? 'コンサルタント' : s.role === 'Legal' ? '弁護士' : s.role})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            staff.find(s => s.id === client.sub_assignee_id)?.real_name || '未割り当て'
+                                        )
+                                    } />
                                     <InfoField label="危機管理責任者" value={
                                         isEditing ? (
                                             <input name="risk_management_officer_name" value={editedClient.risk_management_officer_name || ''} onChange={handleInputChange} className={inputClass} />

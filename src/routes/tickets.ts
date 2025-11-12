@@ -12,7 +12,17 @@ tickets.get('/', authMiddleware, async (c) => {
   try {
     const user = c.get('user');
     
-    let query = 'SELECT * FROM message_tickets';
+    let query = `
+      SELECT 
+        mt.*,
+        c.company_name,
+        s1.real_name as main_assignee_name,
+        s2.real_name as sub_assignee_name
+      FROM message_tickets mt
+      LEFT JOIN clients c ON mt.client_id = c.id
+      LEFT JOIN staff s1 ON c.main_assignee_id = s1.id
+      LEFT JOIN staff s2 ON c.sub_assignee_id = s2.id
+    `;
     let params: any[] = [];
 
     // クライアントユーザーは自分のチケットのみ取得
@@ -20,11 +30,11 @@ tickets.get('/', authMiddleware, async (c) => {
       if (!user.clientId) {
         return c.json<ApiResponse>({ success: false, error: 'クライアント情報が見つかりません' }, 400);
       }
-      query += ' WHERE client_id = ?';
+      query += ' WHERE mt.client_id = ?';
       params.push(user.clientId);
     }
 
-    query += ' ORDER BY last_update DESC';
+    query += ' ORDER BY mt.last_update DESC';
 
     const results = await queryAll<MessageTicket>(c.env.DB, query, ...params);
 
@@ -71,11 +81,27 @@ tickets.get('/:id', authMiddleware, async (c) => {
       read_by: JSON.parse(msg.read_by as any || '[]') as number[],
     }));
 
+    // クライアント情報と担当者情報を取得
+    const clientInfo = await queryFirst(
+      c.env.DB,
+      `SELECT 
+        c.id, c.company_name, c.contact_person as contact_name,
+        c.main_assignee_id, c.sub_assignee_id,
+        s1.name as main_assignee_name, s1.real_name as main_assignee_real_name,
+        s2.name as sub_assignee_name, s2.real_name as sub_assignee_real_name
+      FROM clients c
+      LEFT JOIN staff s1 ON c.main_assignee_id = s1.id
+      LEFT JOIN staff s2 ON c.sub_assignee_id = s2.id
+      WHERE c.id = ?`,
+      ticket.client_id
+    );
+
     return c.json<ApiResponse>({ 
       success: true, 
       data: { 
         ticket, 
-        messages: parsedMessages 
+        messages: parsedMessages,
+        client: clientInfo
       } 
     });
   } catch (error) {

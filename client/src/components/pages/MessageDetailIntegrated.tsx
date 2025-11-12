@@ -12,6 +12,18 @@ interface Message {
     created_at: string;
 }
 
+interface ClientInfo {
+    id: number;
+    company_name: string;
+    contact_name: string;
+    main_assignee_id?: number | null;
+    sub_assignee_id?: number | null;
+    main_assignee_name?: string | null;
+    main_assignee_real_name?: string | null;
+    sub_assignee_name?: string | null;
+    sub_assignee_real_name?: string | null;
+}
+
 interface TicketDetail {
     id: number;
     ticket_id: string;
@@ -22,6 +34,7 @@ interface TicketDetail {
     created_at: string;
     last_update: string;
     messages: Message[];
+    client?: ClientInfo;
 }
 
 const MessageDetailIntegrated: React.FC = () => {
@@ -158,6 +171,45 @@ const MessageDetailIntegrated: React.FC = () => {
                     <p>作成日時: {new Date(ticket.created_at).toLocaleString('ja-JP')}</p>
                     <p>最終更新: {new Date(ticket.last_update).toLocaleString('ja-JP')}</p>
                 </div>
+
+                {/* 担当者情報 */}
+                {ticket.client && (
+                    <div className="border-t pt-4 mt-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i className="fas fa-user-shield text-primary mr-2"></i>
+                            担当者情報
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            {ticket.client.main_assignee_real_name ? (
+                                <div className="flex items-start">
+                                    <span className="text-gray-500 mr-2">主担当:</span>
+                                    <span className="text-gray-900 font-medium">
+                                        {ticket.client.main_assignee_real_name}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-start">
+                                    <span className="text-gray-500 mr-2">主担当:</span>
+                                    <span className="text-gray-400">未割り当て</span>
+                                </div>
+                            )}
+                            
+                            {ticket.client.sub_assignee_real_name ? (
+                                <div className="flex items-start">
+                                    <span className="text-gray-500 mr-2">副担当:</span>
+                                    <span className="text-gray-900 font-medium">
+                                        {ticket.client.sub_assignee_real_name}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-start">
+                                    <span className="text-gray-500 mr-2">副担当:</span>
+                                    <span className="text-gray-400">未割り当て</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* メッセージスレッド */}
