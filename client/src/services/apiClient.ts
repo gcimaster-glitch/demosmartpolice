@@ -33,7 +33,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('smartpolice_user');
+      // Use hash router path
+      window.location.href = '/#/login';
     }
     return Promise.reject(error);
   }

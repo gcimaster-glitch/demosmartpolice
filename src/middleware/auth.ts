@@ -24,9 +24,21 @@ export async function authMiddleware(c: Context<{ Bindings: Bindings }>, next: N
   }
 
   // Verify user still exists and is active
-  const user = await getUserById(c.env.DB, payload.userId);
-  if (!user || !user.is_active) {
-    return c.json({ success: false, error: 'Unauthorized - User not found or inactive' }, 401);
+  // For STAFF role, check staff table; for others, check users table
+  if (payload.role === 'STAFF') {
+    const staff = await c.env.DB
+      .prepare('SELECT id, status FROM staff WHERE id = ? AND status = ?')
+      .bind(payload.userId, 'active')
+      .first<any>();
+    
+    if (!staff) {
+      return c.json({ success: false, error: 'Unauthorized - Staff not found or inactive' }, 401);
+    }
+  } else {
+    const user = await getUserById(c.env.DB, payload.userId);
+    if (!user || !user.is_active) {
+      return c.json({ success: false, error: 'Unauthorized - User not found or inactive' }, 401);
+    }
   }
 
   // Store user info in context

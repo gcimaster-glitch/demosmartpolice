@@ -44,7 +44,7 @@ import AdminSidebar from './components/admin/AdminSidebar.tsx';
 import AdminDashboard from './components/admin/pages/AdminDashboardIntegrated.tsx';
 import AdminClientManagement from './components/admin/pages/AdminClientManagement.tsx';
 import AdminStaffManagementSimple from './components/admin/pages/AdminStaffManagementSimple.tsx';
-import AdminTicketManagement from './components/admin/pages/AdminTicketManagementIntegrated.tsx';
+import AdminTicketManagement from './components/admin/pages/AdminTicketManagement.tsx';
 import AdminTicketHistoryManagement from './components/admin/pages/AdminTicketHistoryManagement.tsx';
 import AdminAnnouncements from './components/admin/pages/AdminAnnouncementsIntegrated.tsx';
 import AdminSeminarManagement from './components/admin/pages/AdminSeminarManagement.tsx';

@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 const easyLoginUsers = {
     'superadmin@smartpolis.jp': { password: 'admin123', role: 'システム管理者' },
     'yamada@abc-shoji.co.jp': { password: 'client123', role: 'クライアント管理者' },
+    'takahashi@smartpolis.jp': { password: 'staff123', role: '担当者' },
 };
 
 // Fix: Changed component to be a named export to resolve module loading error.

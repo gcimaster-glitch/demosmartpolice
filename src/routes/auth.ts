@@ -39,13 +39,45 @@ const registerSchema = z.object({
   affiliateCode: z.string().optional(),
 });
 
-// POST /api/auth/login - ログイン
+// POST /api/auth/login - 統一ログイン（users + staff対応）
 auth.post('/login', zValidator('json', loginSchema), async (c) => {
   try {
     const { email, password } = await c.req.json<LoginRequest>();
 
-    // ユーザーを検索
-    const user = await getUserByEmail(c.env.DB, email);
+    // まずusersテーブルから検索
+    let user = await getUserByEmail(c.env.DB, email);
+    let isStaff = false;
+
+    // usersテーブルにない場合、staffテーブルを検索
+    if (!user) {
+      const staff = await c.env.DB
+        .prepare('SELECT * FROM staff WHERE email = ? AND status = ?')
+        .bind(email, 'active')
+        .first<any>();
+
+      if (staff) {
+        // 承認ステータスチェック
+        if (staff.approval_status !== 'approved') {
+          return c.json<ApiResponse>({ 
+            success: false, 
+            error: 'アカウントが承認されていません。管理者にお問い合わせください。' 
+          }, 403);
+        }
+
+        // staff を user 形式に変換
+        user = {
+          id: staff.id,
+          name: staff.real_name,
+          email: staff.email,
+          role: 'STAFF',
+          password_hash: staff.password,
+          staff_id: staff.id,
+          client_id: null,
+          affiliate_id: null,
+        };
+        isStaff = true;
+      }
+    }
 
     if (!user) {
       return c.json<ApiResponse>({ 
@@ -67,8 +99,10 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     // JWTトークン生成
     const token = await generateToken(user, c.env.JWT_SECRET);
 
-    // 最終ログイン時刻を更新
-    await updateLastLogin(c.env.DB, user.id);
+    // 最終ログイン時刻を更新（staffの場合はスキップ）
+    if (!isStaff) {
+      await updateLastLogin(c.env.DB, user.id);
+    }
 
     // レスポンスデータ
     const response: LoginResponse = {
@@ -290,6 +324,86 @@ auth.post('/register', zValidator('json', registerSchema), async (c) => {
   }
 });
 
+// POST /api/auth/staff/login - 担当者ログイン（DEPRECATED: 統一ログインに移行済み）
+// NOTE: このエンドポイントは後方互換性のために残していますが、/api/auth/loginを使用してください
+auth.post('/staff/login', zValidator('json', loginSchema), async (c) => {
+  try {
+    const { email, password } = await c.req.json<LoginRequest>();
+
+    // 担当者を検索
+    const staff = await c.env.DB
+      .prepare('SELECT * FROM staff WHERE email = ? AND status = ?')
+      .bind(email, 'active')
+      .first<any>();
+
+    if (!staff) {
+      return c.json<ApiResponse>({ 
+        success: false, 
+        error: 'メールアドレスまたはパスワードが正しくありません' 
+      }, 401);
+    }
+
+    // パスワード検証
+    const isValidPassword = await verifyPassword(password, staff.password);
+
+    if (!isValidPassword) {
+      return c.json<ApiResponse>({ 
+        success: false, 
+        error: 'メールアドレスまたはパスワードが正しくありません' 
+      }, 401);
+    }
+
+    // 承認ステータスチェック
+    if (staff.approval_status !== 'approved') {
+      return c.json<ApiResponse>({ 
+        success: false, 
+        error: 'アカウントが承認されていません。管理者にお問い合わせください。' 
+      }, 403);
+    }
+
+    // JWTトークン生成（staff用の疑似userオブジェクト）
+    const userForToken = {
+      id: staff.id,
+      name: staff.real_name,
+      email: staff.email,
+      role: 'STAFF',
+      staff_id: staff.id,
+    };
+    
+    const token = await generateToken(userForToken as any, c.env.JWT_SECRET);
+
+    // レスポンスデータ
+    const response = {
+      user: {
+        id: staff.id,
+        name: staff.real_name,
+        displayName: staff.name,
+        email: staff.email,
+        role: 'STAFF',
+        staffRole: staff.role,
+        position: staff.position,
+        photoUrl: staff.photo_url,
+        staffId: staff.id,
+      },
+      token,
+    };
+
+    return c.json<ApiResponse<typeof response>>({ 
+      success: true, 
+      data: response,
+      message: 'ログインに成功しました'
+    }, 200, {
+      'Set-Cookie': createCookieHeader(token),
+    });
+  } catch (error) {
+    console.error('Staff login error:', error);
+    return c.json<ApiResponse>({ 
+      success: false, 
+      error: 'ログイン処理中にエラーが発生しました' 
+    }, 500);
+  }
+});
+
 // POST /api/auth/logout - ログアウト
 auth.post('/logout', async (c) => {
   return c.json<ApiResponse>({ 
@@ -321,11 +435,31 @@ auth.get('/me', async (c) => {
       }, 401);
     }
 
-    // ユーザー情報を取得
-    const user = await c.env.DB
+    // まずusersテーブルから検索
+    let user = await c.env.DB
       .prepare('SELECT id, name, email, role, client_id, staff_id, affiliate_id FROM users WHERE id = ? AND is_active = 1')
       .bind(payload.userId)
-      .first();
+      .first<any>();
+
+    // usersテーブルにない場合、staffテーブルを検索（roleがSTAFFの場合）
+    if (!user && payload.role === 'STAFF') {
+      const staff = await c.env.DB
+        .prepare('SELECT id, real_name as name, email FROM staff WHERE id = ? AND status = ?')
+        .bind(payload.userId, 'active')
+        .first<any>();
+
+      if (staff) {
+        user = {
+          id: staff.id,
+          name: staff.name,
+          email: staff.email,
+          role: 'STAFF',
+          client_id: null,
+          staff_id: staff.id,
+          affiliate_id: null,
+        };
+      }
+    }
 
     if (!user) {
       return c.json<ApiResponse>({ 
@@ -342,9 +476,9 @@ auth.get('/me', async (c) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          clientId: user.client_id,
-          staffId: user.staff_id,
-          affiliateId: user.affiliate_id,
+          clientId: user.client_id || undefined,
+          staffId: user.staff_id || undefined,
+          affiliateId: user.affiliate_id || undefined,
         }
       }
     });

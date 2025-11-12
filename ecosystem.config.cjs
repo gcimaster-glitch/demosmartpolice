@@ -1,4 +1,5 @@
 // PM2 Configuration for Development Environment
+// Note: Frontend is built and served by wrangler pages dev from dist/
 module.exports = {
   apps: [
     {
@@ -9,22 +10,6 @@ module.exports = {
       env: {
         NODE_ENV: 'development',
         PORT: 3000
-      },
-      watch: false,
-      instances: 1,
-      exec_mode: 'fork',
-      autorestart: true,
-      max_restarts: 10,
-      min_uptime: '10s'
-    },
-    {
-      name: 'smartpolis-frontend',
-      script: 'npm',
-      args: 'run dev',
-      cwd: '/home/user/webapp/client',
-      env: {
-        NODE_ENV: 'development',
-        PORT: 5173
       },
       watch: false,
       instances: 1,

@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler pages dev dist --d1=smartpolis-db --local --ip 0.0.0.0 --port 3000",
-    "build": "npm run build:client && npm run build:server",
+    "build": "npm run build:client && npm run build:server && npm run copy:client",
     "build:client": "cd client && npm run build",
     "build:server": "vite build",
+    "copy:client": "cp -r client/dist/* dist/",
     "preview": "wrangler pages dev dist",
     "deploy": "npm run build && wrangler pages deploy dist --project-name smartpolis-portal",
     "clean-port": "fuser -k 3000/tcp 2>/dev/null || true",
