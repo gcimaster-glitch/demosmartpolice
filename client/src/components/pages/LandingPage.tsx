@@ -4,9 +4,9 @@ import { useClientData } from '../../ClientDataContext.tsx';
 import AIChatFAB from '../AIChatFAB.tsx';
 
 const testimonials = [
-    { name: '田中 圭', company: '株式会社A&B', quote: '導入前はSNSでの些細な火種に常に怯えていましたが、スマートポリスさんのおかげで安心して事業に集中できるようになりました。特に定期的なレポーティングは、我々が気づかないリスクを可視化してくれて助かっています。', avatar: 'https://fastly.picsum.photos/seed/avatar1/150/150.jpg' },
-    { name: '鈴木 浩二', company: 'XYZ Logistics', quote: '専属の危機管理官の方が非常に頼りになります。法務・労務の知識も豊富で、単なるセキュリティ対策以上の価値を感じています。まさに「用心棒」という言葉がぴったりです。', avatar: 'https://fastly.picsum.photos/seed/avatar2/150/150.jpg' },
-    { name: '佐藤 優子', company: 'クリエイティブ・デザインズ', quote: 'フリーランスの集まりで法人成りしたばかりの我々にとって、月額費用を抑えつつ専門家のアドバイスを受けられるスタンダードプランは最適でした。コスト以上の安心感を得られています。', avatar: 'https://fastly.picsum.photos/seed/avatar3/150/150.jpg' },
+    { name: '田中 圭', company: '株式会社A&B', quote: '導入前はSNSでの些細な火種に常に怯えていましたが、スマートポリスさんのおかげで安心して事業に集中できるようになりました。特に定期的なレポーティングは、我々が気づかないリスクを可視化してくれて助かっています。', avatar: 'https://i.pravatar.cc/150?u=tanaka' },
+    { name: '鈴木 浩二', company: 'XYZ Logistics', quote: '専属の危機管理官の方が非常に頼りになります。法務・労務の知識も豊富で、単なるセキュリティ対策以上の価値を感じています。まさに「用心棒」という言葉がぴったりです。', avatar: 'https://i.pravatar.cc/150?u=suzuki' },
+    { name: '佐藤 優子', company: 'クリエイティブ・デザインズ', quote: 'フリーランスの集まりで法人成りしたばかりの我々にとって、月額費用を抑えつつ専門家のアドバイスを受けられるスタンダードプランは最適でした。コスト以上の安心感を得られています。', avatar: 'https://i.pravatar.cc/150?u=sato' },
 ];
 
 const faqItems = [
@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
             {/* Hero Section */}
             <section className="relative bg-gray-800 text-white py-24 md:py-32">
                 <div className="absolute inset-0">
-                    <img src="https://fastly.picsum.photos/seed/smartpolice-hero/1920/1080.jpg" alt="Team working" className="w-full h-full object-cover opacity-20" />
+                    <img src="https://images.unsplash.com/photo-1558021211-6514f3b140f5?q=80&w=1974&auto=format&fit=crop" alt="Team working" className="w-full h-full object-cover opacity-20" />
                 </div>
                 <div className="container mx-auto px-6 text-center relative z-10">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight md:leading-relaxed">
@@ -92,7 +92,7 @@ const LandingPage: React.FC = () => {
                             </p>
                         </div>
                         <div>
-                            <img src="https://fastly.picsum.photos/seed/smartpolice-about/1200/800.jpg" alt="Professionals discussing" className="rounded-lg shadow-xl" />
+                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" alt="Professionals discussing" className="rounded-lg shadow-xl" />
                         </div>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ const LandingPage: React.FC = () => {
                     </div>
                      <div className="grid md:grid-cols-2 gap-10">
                         <div>
-                            <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center"><i className="fas fa-building text-blue-500 mr-3"></i>企業向け</h3>
+                            <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center"><i className="fas fa-building text-blue-500 mr-3"></i><span className="text-gray-800">企業向け</span></h3>
                             <div className="space-y-4">
                                 {['社内不正・情報漏洩', 'ハラスメント問題', '反社会的勢力からの接触', '経営層・従業員の身辺警護', 'SNS炎上・風評被害対策', 'サイバーセキュリティ対策'].map(item => (
                                     <div key={item} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500 text-gray-800">{item}</div>
@@ -115,7 +115,7 @@ const LandingPage: React.FC = () => {
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center"><i className="fas fa-user-shield text-green-500 mr-3"></i>個人・団体向け</h3>
+                            <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center"><i className="fas fa-user-shield text-green-500 mr-3"></i><span className="text-gray-800">個人・団体向け</span></h3>
                             <div className="space-y-4">
                                 {['ストーカー・DV・近隣トラブル', 'ネット誹謗中傷', '家族間トラブル・財産管理', '詐欺被害・金銭トラブル', '反社チェック・取引先調査', '旅行・イベント時の安全対策'].map(item => (
                                     <div key={item} className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500 text-gray-800">{item}</div>
@@ -263,7 +263,7 @@ const LandingPage: React.FC = () => {
                             <div key={index} className="border rounded-lg">
                                 <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex justify-between items-center p-4 text-left font-semibold text-gray-800">
                                     <span className="text-gray-800">{item.question}</span>
-                                    <i className={`fas fa-chevron-down transition-transform ${openFaq === index ? 'rotate-180' : ''}`}></i>
+                                    <i className={`fas fa-chevron-down transition-transform text-gray-500 ${openFaq === index ? 'rotate-180' : ''}`}></i>
                                 </button>
                                 {openFaq === index && (
                                     <div className="p-4 border-t bg-gray-50 text-gray-600">

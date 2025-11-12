@@ -4,13 +4,25 @@ import { useDropzone } from 'react-dropzone';
 import { useClientData } from '../../ClientDataContext.tsx';
 import { sendNewMessageEmail } from '../../services/notificationService.ts';
 import { useAuth } from '../../AuthContext.tsx';
+import { uploadFile } from '../../services/fileService.ts';
+import type { Attachment } from '../../types.ts';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const formatBytes = (bytes: number, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
 
 const NewMessage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { createTicket } = useClientData();
+    const { createTicket, currentClient } = useClientData();
     
     const [subject, setSubject] = useState('');
     const [priority, setPriority] = useState<'高' | '中' | '低'>('中');
@@ -19,6 +31,22 @@ const NewMessage: React.FC = () => {
     const [files, setFiles] = useState<File[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [fileErrors, setFileErrors] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!currentClient || currentClient.remainingTickets < 1) {
+        return (
+            <div className="fade-in">
+                <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <i className="fas fa-ticket-alt text-5xl text-red-400 mb-4"></i>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">チケットが不足しています</h2>
+                    <p className="text-gray-600 mb-6">新規相談を開始するにはチケットが1枚必要です。</p>
+                    <button onClick={() => navigate('/app/plan-change')} className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        チケットを追加・プラン変更
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
         const newFiles = [...files, ...acceptedFiles];
@@ -46,22 +74,42 @@ const NewMessage: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!validate() || !user) {
+        if (!validate() || !user || isSubmitting) {
             if (!user) alert('ログイン情報が見つかりません。');
             return;
         }
 
+        setIsSubmitting(true);
+
+        const uploadedAttachments: Attachment[] = [];
+        for (const file of files) {
+            try {
+                const { url } = await uploadFile(file);
+                uploadedAttachments.push({
+                    name: file.name,
+                    url: url,
+                    size: formatBytes(file.size),
+                });
+            } catch (error) {
+                console.error("File upload simulation failed for:", file.name, error);
+                alert(`${file.name}のアップロードに失敗しました。`);
+                setIsSubmitting(false);
+                return;
+            }
+        }
+        
         const newId = createTicket({
             subject,
             firstMessage,
             priority,
             category,
-            attachmentCount: files.length
+            attachments: uploadedAttachments
         });
 
         if (newId === -1) {
+            setIsSubmitting(false);
             return; // createTicket already shows an alert on failure.
         }
 
@@ -73,6 +121,7 @@ const NewMessage: React.FC = () => {
         );
         
         alert('新規相談を送信しました。1チケットが消費されました。');
+        setIsSubmitting(false);
         navigate(`/app/messages/${newId}`);
     };
 
@@ -80,14 +129,6 @@ const NewMessage: React.FC = () => {
         setFiles(prev => prev.filter(file => file !== fileToRemove));
     };
 
-    const formatBytes = (bytes: number, decimals = 2) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    };
 
     return (
         <div className="fade-in">
@@ -145,12 +186,12 @@ const NewMessage: React.FC = () => {
 
                     <div>
                         <label htmlFor="first-message" className="block text-sm font-medium text-gray-700 mb-2">
-                            最初のメッセージ <span className="text-danger">*</span>
+                            相談内容 <span className="text-danger">*</span>
                         </label>
                         <textarea id="first-message" name="first_message" rows={6} 
                                   value={firstMessage} onChange={(e) => setFirstMessage(e.target.value)}
                                   className={`w-full enhanced-input p-2 border rounded-md ${errors.firstMessage ? 'invalid-input' : ''}`}
-                                  placeholder="相談したい内容を詳しくお書きください。"></textarea>
+                                  placeholder="相談内容の詳細を記入してください。"></textarea>
                         {errors.firstMessage && <p className="text-xs text-danger mt-1">{errors.firstMessage}</p>}
                     </div>
                     
@@ -183,7 +224,10 @@ const NewMessage: React.FC = () => {
                                         </div>
                                         <div className="flex items-center space-x-3">
                                             <span className="text-xs text-gray-500">{formatBytes(file.size)}</span>
-                                            <button type="button" onClick={() => removeFile(file)} className="text-red-500 hover:text-red-700">
+                                            <a href={URL.createObjectURL(file)} download={file.name} className="text-blue-500 hover:text-blue-700" title="ダウンロード">
+                                                <i className="fas fa-download"></i>
+                                            </a>
+                                            <button type="button" onClick={() => removeFile(file)} className="text-red-500 hover:text-red-700" title="削除">
                                                 <i className="fas fa-times-circle"></i>
                                             </button>
                                         </div>
@@ -197,9 +241,8 @@ const NewMessage: React.FC = () => {
                         <button type="button" onClick={() => navigate('/app/messages')} className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors focus-ring">
                             キャンセル
                         </button>
-                        <button type="submit" className="px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors focus-ring">
-                            <i className="fas fa-comments mr-2"></i>
-                            チャット相談を開始
+                        <button type="submit" disabled={isSubmitting} className="px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700 transition-colors focus-ring disabled:bg-gray-400">
+                            {isSubmitting ? <><i className="fas fa-spinner fa-spin mr-2"></i>送信中...</> : <><i className="fas fa-comments mr-2"></i>チャット相談を開始</>}
                         </button>
                     </div>
                 </form>

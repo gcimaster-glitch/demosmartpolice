@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Notification } from '../types.ts';
 import { useAuth } from '../AuthContext.tsx';
+import { useClientData } from '../ClientDataContext.tsx';
 import { Link, useNavigate } from 'react-router-dom';
 
 
 const Header: React.FC = () => {
     const { user, logout } = useAuth();
+    const { currentClient } = useClientData();
     const navigate = useNavigate();
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -168,8 +170,12 @@ const Header: React.FC = () => {
                         
                         <div className="relative" ref={userMenuRef}>
                             <button onClick={() => setUserMenuOpen(prev => !prev)} className="flex items-center space-x-3 cursor-pointer">
-                                <div className="bg-primary text-white rounded-full h-9 w-9 flex items-center justify-center">
-                                    <i className="fas fa-user text-sm"></i>
+                                 <div className="bg-primary text-white rounded-full h-9 w-9 flex items-center justify-center overflow-hidden">
+                                    {currentClient?.companyLogoUrl ? (
+                                        <img src={currentClient.companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <i className="fas fa-user text-sm"></i>
+                                    )}
                                 </div>
                                 <div className="hidden md:block">
                                     <div className="text-sm font-medium text-gray-900">{user?.name}</div>
@@ -189,6 +195,9 @@ const Header: React.FC = () => {
                                         <div className="border-t border-gray-100 my-1"></div>
                                         <Link to="/app/settings" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm rounded-md">
                                             <i className="fas fa-cog mr-2"></i>設定
+                                        </Link>
+                                        <Link to="/app/settings" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm rounded-md">
+                                            <i className="fas fa-key mr-2"></i>パスワード変更
                                         </Link>
                                         <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 text-sm rounded-md">
                                             <i className="fas fa-sign-out-alt mr-2"></i>ログアウト

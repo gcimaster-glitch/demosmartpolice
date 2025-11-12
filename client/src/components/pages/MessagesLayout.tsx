@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, Link, useParams, useNavigate } from 'react-router-dom';
-import MessagesList from './MessagesListIntegrated.tsx';
+import MessagesList from './MessagesList.tsx';
 
 const MessagesLayout: React.FC = () => {
     const location = useLocation();

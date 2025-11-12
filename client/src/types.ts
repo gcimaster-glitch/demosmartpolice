@@ -1,4 +1,5 @@
 
+
 export type UserRole = 'CLIENTADMIN' | 'CLIENT' | 'SUPERADMIN' | 'ADMIN' | 'STAFF' | 'AFFILIATE';
 
 export type Permission = 
@@ -73,9 +74,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
-  clientId?: number;
-  staffId?: number;
-  affiliateId?: string;
+  clientId?: number;  // Added for integrated pages
 }
 
 export interface Notification {
@@ -108,6 +107,12 @@ export interface Participant {
   avatar: string; // icon class
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  size: string;
+}
+
 export interface MessageTicket {
   id: number;
   subject: string;
@@ -118,6 +123,7 @@ export interface MessageTicket {
   lastUpdate: string;
   unreadCount: number;
   attachmentCount: number;
+  attachments?: Attachment[];
   ticketId: string;
   category: string;
   clientId: number;
@@ -190,6 +196,7 @@ export interface ClientUser {
   phone: string;
   isPrimaryContact: boolean;
   role: 'CLIENTADMIN' | 'CLIENT';
+  avatar?: string;
   department?: string;
   familyNameKana?: string;
   givenNameKana?: string;
@@ -238,6 +245,13 @@ export interface Client {
   billingPhone?: string;
   cardNumber?: string;
   cardExpiry?: string;
+  companyLogoUrl?: string;
+  pendingPlanChange?: {
+    planId: string;
+    effectiveDate: string;
+    approvedBy?: string;
+    approvedAt?: string;
+  };
 
   // NEW fields from spec, all optional for safety
   // 2-1. System Meta

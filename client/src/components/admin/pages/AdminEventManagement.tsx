@@ -110,7 +110,8 @@ const EventEditorView: React.FC = () => {
                      </div>
                      <div>
                         <label className="block text-sm font-medium text-gray-700">メイン画像</label>
-                        <ImageUploader imageUrl={formData.mainImageUrl} onImageChange={url => setFormData(p => ({...p, mainImageUrl: url}))} onImageRemove={() => setFormData(p => ({...p, mainImageUrl: ''}))} recommendedSizeText="推奨サイズ: 800x400px" maxWidth={800} maxHeight={400} />
+                        {/* FIX: Add missing maxSizeInMB prop */}
+                        <ImageUploader imageUrl={formData.mainImageUrl} onImageChange={url => setFormData(p => ({...p, mainImageUrl: url}))} onImageRemove={() => setFormData(p => ({...p, mainImageUrl: ''}))} recommendedSizeText="推奨サイズ: 800x400px" maxWidth={800} maxHeight={400} maxSizeInMB={1} />
                     </div>
                     
                     {!isCreating && event && (

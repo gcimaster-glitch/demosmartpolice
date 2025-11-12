@@ -147,7 +147,18 @@ const StaffEditorView: React.FC = () => {
                     {activeTab === 'basic' && (
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div><label className="block text-sm font-medium text-gray-700">顔写真</label><ImageUploader imageUrl={formData.photoUrl} onImageChange={(url) => setFormData(p=>({...p, photoUrl: url}))} onImageRemove={()=>setFormData(p=>({...p, photoUrl:''}))} recommendedSizeText="推奨: 200x240px" maxWidth={200} maxHeight={240} /></div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">顔写真</label>
+                                    <ImageUploader 
+                                        imageUrl={formData.photoUrl} 
+                                        onImageChange={(url) => setFormData(p=>({...p, photoUrl: url}))} 
+                                        onImageRemove={()=>setFormData(p=>({...p, photoUrl:''}))} 
+                                        recommendedSizeText="推奨: 500x500px, 1MB以下" 
+                                        maxWidth={500} 
+                                        maxHeight={500}
+                                        maxSizeInMB={1}
+                                    />
+                                </div>
                                 <div className="md:col-span-2 space-y-4">
                                     <div><label className="block text-sm font-medium text-gray-700">本名<span className="text-danger">*</span></label><input type="text" name="realName" value={formData.realName} onChange={e=>handleInputChange(e)} className={`${inputClass} ${errors.realName ? 'invalid-input' : ''}`}/><p className="text-xs text-danger mt-1 h-3">{errors.realName}</p></div>
                                     <div><label className="block text-sm font-medium text-gray-700">業務名</label><input type="text" name="businessName" value={formData.businessName} onChange={e=>handleInputChange(e)} className={inputClass}/></div>

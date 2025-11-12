@@ -17,22 +17,23 @@ const AdminSidebar: React.FC = () => {
     const navigate = useNavigate();
 
     const navItems: NavItem[] = [
-        { to: "/app/admin", icon: "fa-tachometer-alt", label: "ダッシュボード", permission: 'VIEW_DASHBOARD' },
-        { to: "/app/admin/clients", icon: "fa-building", label: "クライアント管理", permission: 'VIEW_CLIENTS' },
-        { to: "/app/admin/staff", icon: "fa-users-cog", label: "担当者管理", permission: 'VIEW_STAFF' },
-        { to: "/app/admin/tickets", icon: "fa-inbox", label: "相談管理", permission: 'VIEW_TICKETS' },
-        { to: "/app/admin/ticket-history", icon: "fa-history", label: "チケット管理", permission: 'VIEW_TICKETS' },
-        { to: "/app/admin/applications", icon: "fa-file-signature", label: "申込管理", permission: 'VIEW_APPLICATIONS' },
-        { to: "/app/admin/announcements", icon: "fa-bullhorn", label: "お知らせ管理", permission: 'VIEW_ANNOUNCEMENTS' },
-        { to: "/app/admin/seminars", icon: "fa-chalkboard-teacher", label: "セミナー管理", permission: 'VIEW_SEMINARS' },
-        { to: "/app/admin/events", icon: "fa-calendar-check", label: "イベント管理", permission: 'VIEW_EVENTS' },
-        { to: "/app/admin/materials", icon: "fa-folder-open", label: "資料室管理", permission: 'VIEW_MATERIALS' },
-        { to: "/app/admin/billing", icon: "fa-receipt", label: "請求管理", permission: 'VIEW_BILLING' },
-        { to: "/app/admin/services", icon: "fa-concierge-bell", label: "サービス管理", permission: 'VIEW_SERVICES' },
-        { to: "/app/admin/plans", icon: "fa-clipboard-list", label: "プラン管理", permission: 'MANAGE_PLANS' },
-        { to: "/app/admin/affiliates", icon: "fa-handshake", label: "アフィリエイト管理", permission: 'MANAGE_AFFILIATES' },
-        { to: "/app/admin/logs", icon: "fa-history", label: "行動ログ", permission: 'VIEW_LOGS' },
-        { to: "/app/admin/roles", icon: "fa-user-shield", label: "権限管理", permission: 'MANAGE_ROLES' },
+        { to: "/app", icon: "fa-tachometer-alt", label: "ダッシュボード", permission: 'VIEW_DASHBOARD' },
+        { to: "/app/clients", icon: "fa-building", label: "クライアント管理", permission: 'VIEW_CLIENTS' },
+        { to: "/app/staff", icon: "fa-users-cog", label: "担当者管理", permission: 'VIEW_STAFF' },
+        { to: "/app/tickets", icon: "fa-inbox", label: "相談管理", permission: 'VIEW_TICKETS' },
+        { to: "/app/ticket-history", icon: "fa-history", label: "チケット管理", permission: 'VIEW_TICKETS' },
+        { to: "/app/applications", icon: "fa-file-signature", label: "申込管理", permission: 'VIEW_APPLICATIONS' },
+        { to: "/app/announcements", icon: "fa-bullhorn", label: "お知らせ管理", permission: 'VIEW_ANNOUNCEMENTS' },
+        { to: "/app/seminars", icon: "fa-chalkboard-teacher", label: "セミナー管理", permission: 'VIEW_SEMINARS' },
+        { to: "/app/events", icon: "fa-calendar-check", label: "イベント管理", permission: 'VIEW_EVENTS' },
+        { to: "/app/materials", icon: "fa-folder-open", label: "資料室管理", permission: 'VIEW_MATERIALS' },
+        { to: "/app/billing", icon: "fa-receipt", label: "請求管理", permission: 'VIEW_BILLING' },
+        { to: "/app/services", icon: "fa-concierge-bell", label: "サービス管理", permission: 'VIEW_SERVICES' },
+        { to: "/app/plans", icon: "fa-clipboard-list", label: "プラン管理", permission: 'MANAGE_PLANS' },
+        { to: "/app/affiliates", icon: "fa-handshake", label: "アフィリエイト管理", permission: 'MANAGE_AFFILIATES' },
+        { to: "/app/analytics", icon: "fa-chart-pie", label: "アクセス解析", permission: 'VIEW_LOGS' },
+        { to: "/app/logs", icon: "fa-history", label: "行動ログ", permission: 'VIEW_LOGS' },
+        { to: "/app/roles", icon: "fa-user-shield", label: "権限管理", permission: 'MANAGE_ROLES' },
     ];
     
     const accessibleNavItems = navItems.filter(item => hasPermission(item.permission));
@@ -57,7 +58,7 @@ const AdminSidebar: React.FC = () => {
                     <NavLink
                         key={item.to}
                         to={item.to}
-                        end={item.to === "/app/admin"}
+                        end={item.to === "/app"}
                         style={({ isActive }) => isActive ? activeStyle : {}}
                         className="flex items-center px-4 py-2.5 text-sm font-medium rounded-md hover:bg-gray-700"
                     >
@@ -74,11 +75,11 @@ const AdminSidebar: React.FC = () => {
                     <i className="fas fa-home w-6 mr-2"></i>TOPページへ
                 </NavLink>
                 <NavLink
-                    to="/app/admin/tickets"
+                    to="/app/messages/new"
                     className="w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
                 >
                     <i className="fas fa-headset w-6 mr-2"></i>
-                    相談管理へ
+                    サポートへ連絡
                 </NavLink>
             </div>
         </div>

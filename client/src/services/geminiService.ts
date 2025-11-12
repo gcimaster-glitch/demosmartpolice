@@ -1,18 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 if (!apiKey) {
   console.warn("VITE_GEMINI_API_KEY is not set. Gemini API calls will fail.");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey || "");
-
+const genAI = new GoogleGenerativeAI(apiKey);
 let chatSession: any = null;
 
 const startAIChatSession = () => {
   if (!apiKey) return null;
   const model = genAI.getGenerativeModel({ 
-    model: "gemini-pro",
+    model: 'gemini-2.0-flash-exp',
     systemInstruction: 'あなたは「スマートポリス」というセキュリティコンサルティングサービスの有能なAIアシスタントです。ユーザーからのサービスに関する質問や、一般的なセキュリティ対策に関する相談に、簡潔かつプロフェッショナルに回答してください。',
   });
   return model.startChat({
@@ -51,7 +50,7 @@ export const generateReplyDraft = async (prompt: string): Promise<string> => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
@@ -75,26 +74,23 @@ ${conversationHistory}
 ---
 現在の入力: "${currentInput}"
 
-返信候補を配列形式で返してください。例: ["候補1", "候補2", "候補3"]`;
+返信候補を以下のJSON形式で返してください:
+{"suggestions": ["候補1", "候補2", "候補3"]}`;
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-2.0-flash-exp",
+        });
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         
-        // Try to parse as JSON array
-        try {
-            const suggestions = JSON.parse(text);
-            if (Array.isArray(suggestions)) {
-                return suggestions.slice(0, 3);
-            }
-        } catch {
-            // If not JSON, split by newlines and take first 3
-            const lines = text.split('\n').filter(line => line.trim());
-            return lines.slice(0, 3);
+        // Try to extract JSON from response
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return parsed.suggestions || [];
         }
-        
         return [];
     } catch (error) {
         console.error("Error generating suggested replies:", error);
@@ -108,19 +104,19 @@ export const getPlaceInfoWithMaps = async (address: string): Promise<{ summary: 
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
         const prompt = `この住所について、周辺の地理的な特徴や主要な施設などを簡潔に3文で要約してください: ${address}`;
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const summary = response.text();
-
-        // For map URL, we'll use Google Maps static URL
-        const encodedAddress = encodeURIComponent(address);
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+        
+        // Note: Google Maps grounding is not supported in @google/generative-ai package
+        // This would require a different approach or API
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
         return { summary, mapUrl };
     } catch (error) {
-        console.error("Error with Maps:", error);
+        console.error("Error with Maps Grounding:", error);
         if (error instanceof Error) {
             return { summary: `場所情報の取得中にエラーが発生しました: ${error.message}`, mapUrl: null };
         }

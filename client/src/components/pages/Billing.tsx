@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom/client';
 import { useClientData } from '../../ClientDataContext.tsx';
 import type { Invoice } from '../../types.ts';
+import InvoicePrintLayout from '../InvoicePrintLayout.tsx';
 
 const Billing: React.FC = () => {
-    const { invoices } = useClientData();
+    const { invoices, currentClient } = useClientData();
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(invoices.length > 0 ? invoices[0] : null);
 
     const getStatusClass = (status: Invoice['status']) => {
@@ -16,114 +18,28 @@ const Billing: React.FC = () => {
     
     const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ja-JP');
 
+    const handleDownloadPdf = (invoice: Invoice) => {
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        if (!printWindow) {
+            alert('ポップアップがブロックされているようです。ブラウザの設定をご確認ください。');
+            return;
+        }
+        
+        const rootElement = printWindow.document.createElement('div');
+        printWindow.document.body.appendChild(rootElement);
+
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(
+            <React.StrictMode>
+                <InvoicePrintLayout invoice={invoice} logoUrl={currentClient?.companyLogoUrl} />
+            </React.StrictMode>
+        );
+    };
+
     const InvoiceDetail: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
         const tax = subtotal * 0.1;
         const total = subtotal + tax;
-
-        const handleDownloadPdf = () => {
-            const printDate = (dateString: string) => new Date(dateString).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
-            
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>請求書 ${invoice.id}</title>
-                            <style>
-                                body { font-family: 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'メイリオ', Meiryo, sans-serif; color: #333; margin: 0; padding: 0; }
-                                .container { width: 800px; margin: 40px auto; border: 1px solid #eee; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-                                .header { background-color: #f7f7f7; padding: 30px; border-bottom: 1px solid #eee; }
-                                .header h1 { font-size: 2.5em; margin: 0; color: #2563eb; float: left; }
-                                .header .invoice-details { text-align: right; }
-                                .header .invoice-details p { margin: 0; line-height: 1.6; font-size: 0.9em; }
-                                .client-info { padding: 30px; }
-                                .client-info h2 { font-size: 1.2em; margin-bottom: 5px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px;}
-                                .items-table { width: 100%; border-collapse: collapse; }
-                                .items-table th, .items-table td { border: 1px solid #eee; padding: 12px; text-align: left; }
-                                .items-table th { background-color: #f7f7f7; font-weight: bold; }
-                                .items-table td { vertical-align: top; }
-                                .text-right { text-align: right !important; }
-                                .totals { padding: 30px; text-align: right; }
-                                .totals table { float: right; width: 40%; }
-                                .totals td { padding: 5px 0; }
-                                .totals .label { font-weight: bold; }
-                                .totals .total-row td { font-size: 1.4em; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; }
-                                .footer { padding: 30px; border-top: 1px solid #eee; font-size: 0.8em; color: #777; }
-                                .clearfix::after { content: ""; clear: both; display: table; }
-                                @media print {
-                                    body { margin: 0; box-shadow: none; border: none; }
-                                    .container { width: 100%; margin: 0; box-shadow: none; border: none; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <div class="header clearfix">
-                                    <h1>請求書</h1>
-                                    <div class="invoice-details">
-                                        <p><strong>請求書番号:</strong> ${invoice.id}</p>
-                                        <p><strong>発行日:</strong> ${printDate(invoice.issueDate)}</p>
-                                        <p><strong>支払期限:</strong> ${printDate(invoice.dueDate)}</p>
-                                    </div>
-                                </div>
-                                <div class="client-info">
-                                    <h2>請求先:</h2>
-                                    <p><strong>${invoice.clientName} 御中</strong></p>
-                                </div>
-                                <div style="padding: 0 30px;">
-                                    <table class="items-table">
-                                        <thead>
-                                            <tr>
-                                                <th>項目</th>
-                                                <th class="text-right">数量</th>
-                                                <th class="text-right">単価</th>
-                                                <th class="text-right">金額</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${invoice.items.map(item => `
-                                                <tr>
-                                                    <td>${item.description}</td>
-                                                    <td class="text-right">${item.quantity}</td>
-                                                    <td class="text-right">¥${item.unitPrice.toLocaleString()}</td>
-                                                    <td class="text-right">¥${item.amount.toLocaleString()}</td>
-                                                </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="totals clearfix">
-                                    <table>
-                                        <tr>
-                                            <td class="label">小計</td>
-                                            <td class="text-right">¥${subtotal.toLocaleString()}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">消費税 (10%)</td>
-                                            <td class="text-right">¥${tax.toLocaleString()}</td>
-                                        </tr>
-                                        <tr class="total-row">
-                                            <td class="label">合計金額</td>
-                                            <td class="text-right">¥${total.toLocaleString()}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="footer">
-                                    <p><strong>発行元:</strong></p>
-                                    <p>スマートポリス株式会社</p>
-                                    <p>〒100-0001 東京都千代田区千代田1-1</p>
-                                    <p>振込先: ○○銀行 ○○支店 普通 1234567</p>
-                                </div>
-                            </div>
-                        </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-            }
-        };
 
         return (
             <div className="bg-white rounded-lg shadow-sm h-full flex flex-col">
@@ -164,7 +80,7 @@ const Billing: React.FC = () => {
                     </div>
                 </div>
                 <div className="p-4 bg-gray-50 text-right rounded-b-lg">
-                    <button onClick={handleDownloadPdf} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                    <button onClick={() => handleDownloadPdf(invoice)} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
                         <i className="fas fa-file-pdf mr-2"></i>PDFダウンロード
                     </button>
                 </div>
@@ -210,6 +126,13 @@ const Billing: React.FC = () => {
                         </div>
                     )}
                 </main>
+            </div>
+             <div className="mt-8 bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
+                <h3 className="font-bold mb-2 flex items-center"><i className="fas fa-info-circle mr-2"></i>請求とチケットに関するご注意</h3>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                    <li>毎月1日にプランの月額料金が請求されます。</li>
+                    <li>毎月1日の午前2時から4時のメンテナンス時間中に、新しい相談チケットが付与されます。</li>
+                </ul>
             </div>
         </div>
     );

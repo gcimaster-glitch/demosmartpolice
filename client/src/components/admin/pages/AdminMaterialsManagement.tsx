@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Material } from '../../../types.ts';
 import { useClientData } from '../../../ClientDataContext.tsx';
 import FileUploader from '../FileUploader.tsx';
+import { uploadFile } from '../../../services/fileService.ts';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -36,6 +37,7 @@ const MaterialEditorView: React.FC = () => {
     const [formData, setFormData] = useState<Omit<Material, 'id' | 'uploadedAt'>>(isCreating ? initialFormState : material || initialFormState);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isSaving, setIsSaving] = useState(false);
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
@@ -46,15 +48,24 @@ const MaterialEditorView: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = () => {
-        if (!validate()) return;
+    const handleSave = async () => {
+        if (!validate() || isSaving) return;
+
+        setIsSaving(true);
         
-        const dataToSave = { ...formData };
+        let dataToSave = { ...formData };
         if (selectedFile) {
-            dataToSave.fileName = selectedFile.name;
-            dataToSave.fileSize = formatBytes(selectedFile.size);
-            // In a real app, you would upload the file and get a URL
-            dataToSave.fileUrl = '#'; // Placeholder
+            try {
+                const { url } = await uploadFile(selectedFile);
+                dataToSave.fileName = selectedFile.name;
+                dataToSave.fileSize = formatBytes(selectedFile.size);
+                dataToSave.fileUrl = url;
+            } catch (error) {
+                console.error("File upload simulation failed:", error);
+                alert('ファイルのアップロードに失敗しました。');
+                setIsSaving(false);
+                return;
+            }
         }
 
         if (isCreating) {
@@ -62,6 +73,8 @@ const MaterialEditorView: React.FC = () => {
         } else if(material) {
             updateMaterial(material.id, dataToSave);
         }
+        
+        setIsSaving(false);
         navigate('/app/materials');
     };
 
@@ -114,7 +127,9 @@ const MaterialEditorView: React.FC = () => {
                 </div>
                 <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
                     <button onClick={() => navigate('/app/materials')} className="px-4 py-2 border rounded-md">キャンセル</button>
-                    <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">保存</button>
+                    <button onClick={handleSave} disabled={isSaving} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400">
+                        {isSaving ? <><i className="fas fa-spinner fa-spin mr-2"></i>保存中...</> : '保存'}
+                    </button>
                 </div>
             </div>
         </div>
@@ -165,13 +180,19 @@ const MaterialListView: React.FC = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">タイトル</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">カテゴリ</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">更新日</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ファイル</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"></th>
                         </tr></thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {materials.map(m => (
-                                <tr key={m.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => navigate(`/app/materials/${m.id}`)}>
-                                    <td className="px-6 py-4 font-medium text-gray-900">{m.title}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">{m.category}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{formatDate(m.uploadedAt)}</td>
+                                <tr key={m.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 font-medium text-gray-900 cursor-pointer" onClick={() => navigate(`/app/materials/${m.id}`)}>{m.title}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700 cursor-pointer" onClick={() => navigate(`/app/materials/${m.id}`)}>{m.category}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 cursor-pointer" onClick={() => navigate(`/app/materials/${m.id}`)}>{formatDate(m.uploadedAt)}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">{m.fileName} ({m.fileSize})</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <a href={m.fileUrl} download={m.fileName} onClick={(e) => e.stopPropagation()} className="text-primary hover:underline">ダウンロード</a>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

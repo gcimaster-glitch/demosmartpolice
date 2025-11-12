@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useRef, useCallback, useMemo } from 'react';
-import type { MessageTicket, Announcement, Seminar, Service, Invoice, ServiceApplication, ApplicationStatus, Client, Staff, AuditLog, User, Role, Permission, UserRole, Plan, ClientPermission, Event, Material, SeminarApplication, EventApplication, ClientUser, Address, BankAccount, Affiliate, Referral, Payout, TicketConsumptionLog, TicketConsumptionType } from './types.ts';
+import type { MessageTicket, Announcement, Seminar, Service, Invoice, ServiceApplication, ApplicationStatus, Client, Staff, AuditLog, User, Role, Permission, UserRole, Plan, ClientPermission, Event, Material, SeminarApplication, EventApplication, ClientUser, Address, BankAccount, Affiliate, Referral, Payout, TicketConsumptionLog, TicketConsumptionType, Attachment } from './types.ts';
 import { useAuth } from './AuthContext.tsx';
 import { sendApplicationStatusEmail, sendNewApplicationEmail } from './services/notificationService.ts';
 
@@ -222,7 +222,7 @@ interface ClientDataContextType {
     registerClient: (data: any, type: 'easy' | 'detailed' | 'simple') => Promise<boolean>;
     updateTicketStatus: (ticketId: number, newStatus: '対応中' | '完了' | '受付中') => void;
     consumeTicket: (clientId: number, type: TicketConsumptionType, description: string, relatedId?: string | number, amount?: number) => boolean;
-    createTicket: (data: { subject: string; firstMessage: string; priority: '高' | '中' | '低'; category: string; attachmentCount: number; }) => number;
+    createTicket: (data: { subject: string; firstMessage: string; priority: '高' | '中' | '低'; category: string; attachments: Attachment[]; }) => number;
     markAnnouncementAsRead: (id: number) => void;
     applyForSeminar: (application: Omit<SeminarApplication, 'seminarId' | 'applicationDate'>, seminarId: number) => { success: boolean; message: string; };
     getSeminarApplicationStatus: (id: number) => boolean;
@@ -238,6 +238,8 @@ interface ClientDataContextType {
     saveClient: (client: Client) => void;
     deleteClient: (id: number) => void;
     changeClientPlan: (clientId: number, newPlanId: string) => void;
+    requestPlanChange: (clientId: number, newPlanId: string) => void;
+    approvePlanChange: (clientId: number) => void;
     createInvoice: (invoiceData: Omit<Invoice, 'id'>) => void;
     deleteInvoice: (id: string) => void;
     createService: (serviceData: Omit<Service, 'id' | 'mainImageUrl' | 'subImageUrls'> & { mainImageUrl?: string; subImageUrls?: string[] }) => void;
@@ -471,7 +473,7 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
         return success;
     };
 
-    const createTicket = (data: { subject: string; firstMessage: string; priority: '高' | '中' | '低'; category: string; attachmentCount: number; }): number => {
+    const createTicket = (data: { subject: string; firstMessage: string; priority: '高' | '中' | '低'; category: string; attachments: Attachment[]; }): number => {
         if (!currentClient) return -1;
 
         const newId = Math.max(0, ...tickets.map(t => t.id)) + 1;
@@ -492,7 +494,8 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
             assigneeId: null,
             lastUpdate: new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).slice(0, 16).replace('T', ' '),
             unreadCount: 1,
-            attachmentCount: data.attachmentCount,
+            attachmentCount: data.attachments.length,
+            attachments: data.attachments,
             category: data.category,
         };
         setTickets(prev => [newTicket, ...prev]);
@@ -653,6 +656,29 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
     const changeClientPlan = (clientId: number, newPlanId: string) => {
         setClients(prev => prev.map(c => c.id === clientId ? { ...c, planId: newPlanId } : c));
         logAction('CHANGE_PLAN', `Client #${clientId} changed plan to ${newPlanId}.`, clientId);
+    };
+
+    const requestPlanChange = (clientId: number, newPlanId: string) => {
+        const now = new Date();
+        const firstOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+        setClients(prev => prev.map(c => 
+            c.id === clientId 
+            ? { ...c, pendingPlanChange: { planId: newPlanId, effectiveDate: firstOfNextMonth.toISOString() } } 
+            : c
+        ));
+        logAction('REQUEST_PLAN_CHANGE', `Client #${clientId} requested plan change to ${newPlanId}.`, clientId);
+    };
+    
+    const approvePlanChange = (clientId: number) => {
+        setClients(prev => prev.map(c => {
+            if (c.id === clientId && c.pendingPlanChange) {
+                const newPlanId = c.pendingPlanChange.planId;
+                logAction('APPROVE_PLAN_CHANGE', `Approved plan change to ${newPlanId} for client #${clientId}.`, clientId);
+                return { ...c, planId: newPlanId, pendingPlanChange: undefined };
+            }
+            return c;
+        }));
     };
 
     const createInvoice = (invoiceData: Omit<Invoice, 'id'>) => {
@@ -908,7 +934,7 @@ export const ClientDataProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const value: ClientDataContextType = {
         tickets, announcements, seminars, events, materials, services, invoices, serviceApplications, staff, clients, clientUsers, auditLogs, roles, plans, affiliates, referrals, payouts, ticketConsumptionLog, currentClient, currentPlan,
-        hasPermission, hasClientPermission, calculateClientProfileCompletion, updateRolePermissions, logAction, registerClient, updateTicketStatus, consumeTicket, createTicket, markAnnouncementAsRead, applyForSeminar, getSeminarApplicationStatus, deleteSeminarApplication, applyForEvent, getEventApplicationStatus, deleteEventApplication, applyForService, processApplication, saveStaff, deleteStaff, approveStaff, saveClient, deleteClient, changeClientPlan, createInvoice, deleteInvoice, createService, updateService, deleteService, saveAnnouncement, deleteAnnouncement, saveSeminar, deleteSeminar, saveEvent, deleteEvent, savePlan, deletePlan, addMaterial, updateMaterial, deleteMaterial,
+        hasPermission, hasClientPermission, calculateClientProfileCompletion, updateRolePermissions, logAction, registerClient, updateTicketStatus, consumeTicket, createTicket, markAnnouncementAsRead, applyForSeminar, getSeminarApplicationStatus, deleteSeminarApplication, applyForEvent, getEventApplicationStatus, deleteEventApplication, applyForService, processApplication, saveStaff, deleteStaff, approveStaff, saveClient, deleteClient, changeClientPlan, requestPlanChange, approvePlanChange, createInvoice, deleteInvoice, createService, updateService, deleteService, saveAnnouncement, deleteAnnouncement, saveSeminar, deleteSeminar, saveEvent, deleteEvent, savePlan, deletePlan, addMaterial, updateMaterial, deleteMaterial,
         getStaffDisplayName, addClientUser, updateClientUser, deleteClientUser, approveReferral, rejectReferral, saveAffiliate, deleteAffiliate, requestPayout, markPayoutAsPaid
     };
 

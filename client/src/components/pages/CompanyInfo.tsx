@@ -3,6 +3,7 @@ import { useClientData } from '../../ClientDataContext.tsx';
 import { useAuth } from '../../AuthContext.tsx';
 import { Link } from 'react-router-dom';
 import type { Address, Client } from '../../types.ts';
+import ImageUploader from '../admin/ImageUploader.tsx';
 
 const statusLabels = {
     active: '有効',
@@ -183,6 +184,18 @@ const CompanyInfo: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
                 
                 <Section title="基本情報" icon="fa-id-card">
+                    <InfoRow label="企業ロゴ" value={isEditing ? 
+                        <ImageUploader 
+                            imageUrl={editedProfile.companyLogoUrl}
+                            onImageChange={url => setEditedProfile(p => p ? {...p, companyLogoUrl: url} : null)}
+                            onImageRemove={() => setEditedProfile(p => p ? {...p, companyLogoUrl: ''} : null)}
+                            maxWidth={200}
+                            maxHeight={200}
+                            maxSizeInMB={1}
+                            recommendedSizeText="推奨: 200x200px, 1MB以下"
+                        /> : 
+                        companyProfile.companyLogoUrl ? <img src={companyProfile.companyLogoUrl} alt="企業ロゴ" className="max-h-16" /> : '未設定'} 
+                    />
                     <InfoRow label="企業ID" value={companyProfile.id} />
                     <InfoRow label="会社名" value={isEditing ? <EditableValue name="companyName"><input type="text" name="companyName" value={editedProfile.companyName} onChange={handleChange} className={inputClass('companyName')} /></EditableValue> : companyProfile.companyName} />
                     <InfoRow label="メイン担当者名" value={isEditing ? <EditableValue name="contactPerson"><input type="text" name="contactPerson" value={editedProfile.contactPerson} onChange={handleChange} className={inputClass('contactPerson')} /></EditableValue> : companyProfile.contactPerson} />

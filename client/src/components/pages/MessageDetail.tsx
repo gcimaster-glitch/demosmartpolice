@@ -460,6 +460,7 @@ const MessageDetail: React.FC = () => {
                                     <div className="space-y-2">
                                         {filteredInvitableMembers.length > 0 ? filteredInvitableMembers.map(member => {
                                              const isSpecialist = member.role === '弁護士' || member.role === '公認会計士';
+                                             const hasEnoughTicketsForSpecialist = !isSpecialist || (currentClient && currentClient.remainingTickets >= 1);
                                              return (
                                             <div key={member.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded">
                                                 <div className="flex items-center">
@@ -472,7 +473,9 @@ const MessageDetail: React.FC = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => handleInvite(member)} className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">招待</button>
+                                                <button onClick={() => handleInvite(member)} disabled={!hasEnoughTicketsForSpecialist} className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                                    {hasEnoughTicketsForSpecialist ? '招待' : 'チケット不足'}
+                                                </button>
                                             </div>
                                         )}) : <p className="text-center text-gray-500 text-sm p-4">招待できるメンバーがいません。</p>}
                                     </div>

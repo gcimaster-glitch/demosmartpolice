@@ -11,20 +11,20 @@ import Header from './components/Header.tsx';
 import Navbar from './components/Navbar.tsx';
 import Footer from './components/Footer.tsx';
 import MobileBottomNav from './components/MobileBottomNav.tsx';
-import Dashboard from './components/pages/DashboardIntegrated.tsx';
-import Announcements from './components/pages/AnnouncementsIntegrated.tsx';
+import Dashboard from './components/pages/Dashboard.tsx';
+import Announcements from './components/pages/Announcements.tsx';
 import MessagesLayout from './components/pages/MessagesLayout.tsx';
-import MessageDetail from './components/pages/MessageDetailIntegrated.tsx';
-import NewMessage from './components/pages/NewMessageIntegrated.tsx';
-import Services from './components/pages/ServicesIntegrated.tsx';
+import MessageDetail from './components/pages/MessageDetail.tsx';
+import NewMessage from './components/pages/NewMessage.tsx';
+import Services from './components/pages/Services.tsx';
 import Materials from './components/pages/Materials.tsx';
-import Seminars from './components/pages/SeminarsIntegrated.tsx';
-import Events from './components/pages/EventsIntegrated.tsx';
-import Billing from './components/pages/BillingIntegrated.tsx';
-import Users from './components/pages/UsersIntegrated.tsx';
+import Seminars from './components/pages/Seminars.tsx';
+import Events from './components/pages/Events.tsx';
+import Billing from './components/pages/Billing.tsx';
+import Users from './components/pages/Users.tsx';
 import Reports from './components/pages/Reports.tsx';
 import PlaceholderPage from './components/pages/PlaceholderPage.tsx';
-import CompanyInfo from './components/pages/CompanyInfoIntegrated.tsx';
+import CompanyInfo from './components/pages/CompanyInfo.tsx';
 import ProtectedRoute from './ProtectedRoute.tsx';
 import AdminProtectedRoute from './AdminProtectedRoute.tsx';
 import { useAuth } from './AuthContext.tsx';
@@ -34,19 +34,19 @@ import Register from './components/pages/Register.tsx';
 import EasyRegister from './components/pages/EasyRegister.tsx';
 import DetailedRegister from './components/pages/DetailedRegister.tsx';
 import LandingPage from './components/pages/LandingPage.tsx';
-import PlanChange from './components/pages/PlanChangeIntegrated.tsx';
-import TicketHistory from './components/pages/TicketHistoryIntegrated.tsx';
+import PlanChange from './components/pages/PlanChange.tsx';
+import TicketHistory from './components/pages/TicketHistory.tsx';
 import AIChatFAB from './components/AIChatFAB.tsx';
 
 
 // Admin Components
 import AdminSidebar from './components/admin/AdminSidebar.tsx';
-import AdminDashboard from './components/admin/pages/AdminDashboardIntegrated.tsx';
+import AdminDashboard from './components/admin/pages/AdminDashboard.tsx';
 import AdminClientManagement from './components/admin/pages/AdminClientManagement.tsx';
-import AdminStaffManagementSimple from './components/admin/pages/AdminStaffManagementSimple.tsx';
+import AdminStaffManagement from './components/admin/pages/AdminStaffManagement.tsx';
 import AdminTicketManagement from './components/admin/pages/AdminTicketManagement.tsx';
 import AdminTicketHistoryManagement from './components/admin/pages/AdminTicketHistoryManagement.tsx';
-import AdminAnnouncements from './components/admin/pages/AdminAnnouncementsIntegrated.tsx';
+import AdminAnnouncements from './components/admin/pages/AdminAnnouncements.tsx';
 import AdminSeminarManagement from './components/admin/pages/AdminSeminarManagement.tsx';
 import AdminEventManagement from './components/admin/pages/AdminEventManagement.tsx';
 import AdminMaterialsManagement from './components/admin/pages/AdminMaterialsManagement.tsx';
@@ -57,7 +57,8 @@ import AdminAuditLog from './components/admin/pages/AdminAuditLog.tsx';
 import AdminRoleManagement from './components/admin/pages/AdminRoleManagement.tsx';
 import AdminPlanManagement from './components/admin/pages/AdminPlanManagement.tsx';
 import AdminAffiliateManagement from './components/admin/pages/AdminAffiliateManagement.tsx';
-import AdminPlaceholderPage from './components/admin/pages/AdminPlaceholderPage.tsx';
+import AdminSettings from './components/admin/pages/AdminSettings.tsx';
+import AdminAnalytics from './components/admin/pages/AdminAnalytics.tsx';
 
 // Affiliate Components
 import AffiliateSidebar from './components/affiliate/AffiliateSidebar.tsx';
@@ -218,89 +219,89 @@ const ClientRoutes = () => (
 
 const AdminRoutes = () => (
      <Routes>
-        <Route path="/" element={<Navigate to="/app/admin" replace />} />
-        <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
+        <Route element={<AdminLayout />}>
+            <Route path="/" element={<AdminDashboard />} />
             
-            <Route path="clients" element={<AdminClientManagement />} />
-            <Route path="clients/:id" element={<AdminClientManagement />} />
+            <Route path="/clients" element={<AdminClientManagement />} />
+            <Route path="/clients/:id" element={<AdminClientManagement />} />
             
-            <Route path="staff" element={<AdminStaffManagementSimple />} />
-            <Route path="staff/new" element={<AdminStaffManagementSimple />} />
-            <Route path="staff/:id" element={<AdminStaffManagementSimple />} />
+            <Route path="/staff" element={<AdminStaffManagement />} />
+            <Route path="/staff/new" element={<AdminStaffManagement />} />
+            <Route path="/staff/:id" element={<AdminStaffManagement />} />
             
-            <Route path="tickets" element={<AdminTicketManagement />} />
-            <Route path="tickets/:id" element={<AdminTicketManagement />} />
-            <Route path="ticket-history" element={<AdminTicketHistoryManagement />} />
+            <Route path="/tickets" element={<AdminTicketManagement />} />
+            <Route path="/tickets/:id" element={<AdminTicketManagement />} />
+            <Route path="/ticket-history" element={<AdminTicketHistoryManagement />} />
 
-            <Route path="applications" element={<AdminApplicationManagement />} />
-            <Route path="applications/:id" element={<AdminApplicationManagement />} />
+            <Route path="/applications" element={<AdminApplicationManagement />} />
+            <Route path="/applications/:id" element={<AdminApplicationManagement />} />
 
-            <Route path="announcements" element={<AdminAnnouncements />} />
-            <Route path="announcements/new" element={<AdminAnnouncements />} />
-            <Route path="announcements/:id" element={<AdminAnnouncements />} />
+            <Route path="/announcements" element={<AdminAnnouncements />} />
+            <Route path="/announcements/new" element={<AdminAnnouncements />} />
+            <Route path="/announcements/:id" element={<AdminAnnouncements />} />
 
-            <Route path="seminars" element={<AdminSeminarManagement />} />
-            <Route path="seminars/new" element={<AdminSeminarManagement />} />
-            <Route path="seminars/:id" element={<AdminSeminarManagement />} />
+            <Route path="/seminars" element={<AdminSeminarManagement />} />
+            <Route path="/seminars/new" element={<AdminSeminarManagement />} />
+            <Route path="/seminars/:id" element={<AdminSeminarManagement />} />
             
-            <Route path="events" element={<AdminEventManagement />} />
-            <Route path="events/new" element={<AdminEventManagement />} />
-            <Route path="events/:id" element={<AdminEventManagement />} />
+            <Route path="/events" element={<AdminEventManagement />} />
+            <Route path="/events/new" element={<AdminEventManagement />} />
+            <Route path="/events/:id" element={<AdminEventManagement />} />
             
-            <Route path="materials" element={<AdminMaterialsManagement />} />
-            <Route path="materials/new" element={<AdminMaterialsManagement />} />
-            <Route path="materials/:id" element={<AdminMaterialsManagement />} />
+            <Route path="/materials" element={<AdminMaterialsManagement />} />
+            <Route path="/materials/new" element={<AdminMaterialsManagement />} />
+            <Route path="/materials/:id" element={<AdminMaterialsManagement />} />
 
-            <Route path="billing" element={<AdminBillingManagement />} />
-            <Route path="billing/new" element={<AdminBillingManagement />} />
-            <Route path="billing/:id" element={<AdminBillingManagement />} />
+            <Route path="/billing" element={<AdminBillingManagement />} />
+            <Route path="/billing/new" element={<AdminBillingManagement />} />
+            <Route path="/billing/:id" element={<AdminBillingManagement />} />
 
-            <Route path="affiliates" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
-            <Route path="affiliates/new" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
-            <Route path="affiliates/:id" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="/affiliates" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="/affiliates/new" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
+            <Route path="/affiliates/:id" element={<AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}><AdminAffiliateManagement /></AdminProtectedRoute>} />
             
-            <Route path="services" element={
+            <Route path="/services" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="services/new" element={
+             <Route path="/services/new" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="services/:id" element={
+             <Route path="/services/:id" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminServiceManagement />
                 </AdminProtectedRoute>
             } />
 
-             <Route path="roles" element={
+             <Route path="/roles" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminRoleManagement />
                 </AdminProtectedRoute>
             } />
-             <Route path="roles/:roleName" element={
+             <Route path="/roles/:roleName" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminRoleManagement />
                 </AdminProtectedRoute>
             } />
             
-            <Route path="plans" element={
+            <Route path="/plans" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN']}>
                     <AdminPlanManagement />
                 </AdminProtectedRoute>
             } />
 
-            <Route path="logs" element={<AdminAuditLog />} />
+            <Route path="/analytics" element={<AdminAnalytics />} />
+            <Route path="/logs" element={<AdminAuditLog />} />
             
-            <Route path="admin-settings" element={
+            <Route path="/admin-settings" element={
                 <AdminProtectedRoute requiredRoles={['SUPERADMIN', 'ADMIN']}>
-                    <AdminPlaceholderPage title="システム設定" />
+                    <AdminSettings />
                 </AdminProtectedRoute>
             } />
-            <Route path="*" element={<Navigate to="/app/admin" />} />
+            <Route path="*" element={<Navigate to="/" />} />
         </Route>
     </Routes>
 );

@@ -76,6 +76,9 @@ const Events: React.FC = () => {
         const isFull = event.applicants.length >= event.capacity;
         const isApplied = getEventApplicationStatus(event.id);
         const applicantRatio = event.capacity > 0 ? (event.applicants.length / event.capacity) * 100 : 0;
+        
+        const requiresTicket = event.location === 'オンライン';
+        const hasEnoughTickets = !requiresTicket || (currentClient && currentClient.remainingTickets >= 1);
 
         const handleApplyClick = () => {
             if (event.location === 'オンライン') {
@@ -105,8 +108,8 @@ const Events: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4"><div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${applicantRatio}%` }}></div></div>
                     {event.status === '募集中' && (
-                        <button onClick={handleApplyClick} disabled={isFull || isApplied} className="w-full py-2 px-4 rounded-md font-medium text-white bg-primary hover:bg-blue-700 disabled:bg-gray-400">
-                            {isApplied ? '申込済み' : isFull ? '満員御礼' : '申し込む'}
+                        <button onClick={handleApplyClick} disabled={isFull || isApplied || !hasEnoughTickets} className="w-full py-2 px-4 rounded-md font-medium text-white bg-primary hover:bg-blue-700 disabled:bg-gray-400">
+                            {isApplied ? '申込済み' : isFull ? '満員御礼' : !hasEnoughTickets ? 'チケットが不足しています' : '申し込む'}
                         </button>
                     )}
                 </div>

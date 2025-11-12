@@ -1,6 +1,5 @@
-
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { useAuth } from '../../AuthContext.tsx';
 import { useClientData } from '../../ClientDataContext.tsx';
 import type { ClientUser } from '../../types.ts';
@@ -17,15 +16,77 @@ const AccessDenied: React.FC = () => {
     );
 };
 
+// ImageUploader Component (specific for this modal)
+const ImageUploader: React.FC<{
+    imageUrl: string | null | undefined;
+    onImageChange: (dataUrl: string) => void;
+}> = ({ imageUrl, onImageChange }) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState('');
+
+    const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
+        setError('');
+        if (fileRejections.length > 0) {
+            setError('ファイルサイズが大きすぎます (最大1MB)。');
+            return;
+        }
+        const file = acceptedFiles[0];
+        if (!file) return;
+
+        setIsProcessing(true);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const size = 500;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    onImageChange(dataUrl);
+                }
+                setIsProcessing(false);
+            };
+            img.src = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    }, [onImageChange]);
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        maxSize: 1024 * 1024, // 1MB
+        accept: { 'image/*': ['.jpeg', '.png', '.jpg'] },
+        multiple: false,
+    });
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700">プロフィール写真</label>
+            <div {...getRootProps()} className="mt-1 w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center border-2 border-dashed cursor-pointer overflow-hidden">
+                <input {...getInputProps()} />
+                {imageUrl ? (
+                    <img src={imageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                    <i className="fas fa-camera text-2xl text-gray-400"></i>
+                )}
+            </div>
+            {isProcessing && <p className="text-xs text-gray-500 mt-1">処理中...</p>}
+            {error && <p className="text-xs text-danger mt-1">{error}</p>}
+        </div>
+    );
+};
+
 const UserEditorModal: React.FC<{
     user: ClientUser | null;
     onClose: () => void;
     onSave: (user: ClientUser | Omit<ClientUser, 'id' | 'clientId'>) => void;
 }> = ({ user, onClose, onSave }) => {
     const isCreating = !user;
-    // FIX: Correctly type initial state. `familyNameKana`, `givenNameKana`, and `department` were missing from the ClientUser type.
     const [formData, setFormData] = useState<ClientUser | Omit<ClientUser, 'id' | 'clientId'>>(
-        isCreating ? { name: '', email: '', position: '', phone: '', isPrimaryContact: false, role: 'CLIENT', familyNameKana: '', givenNameKana: '', department: '' } : { ...user }
+        isCreating ? { name: '', email: '', position: '', phone: '', isPrimaryContact: false, role: 'CLIENT', familyNameKana: '', givenNameKana: '', department: '', avatar: '' } : { ...user }
     );
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -40,9 +101,9 @@ const UserEditorModal: React.FC<{
             <div className="bg-white rounded-lg shadow-xl w-full max-w-lg fade-in" onClick={e => e.stopPropagation()}>
                 <div className="p-6 border-b"><h3 className="text-lg font-bold text-gray-900">{isCreating ? '新規ユーザー追加' : 'ユーザー編集'}</h3></div>
                 <div className="p-6 space-y-4">
+                    <ImageUploader imageUrl={formData.avatar} onImageChange={(url) => setFormData(p => ({...p, avatar: url}))} />
                     <div><label className="block text-sm font-medium text-gray-700">氏名</label><input type="text" name="name" value={formData.name} onChange={handleChange} className={inputClass + " mt-1"} /></div>
                     <div><label className="block text-sm font-medium text-gray-700">メールアドレス</label><input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass + " mt-1"} /></div>
-                    {/* FIX: Use `|| ''` to prevent uncontrolled component warning when `department` is optional and undefined. */}
                     <div><label className="block text-sm font-medium text-gray-700">部署</label><input type="text" name="department" value={formData.department || ''} onChange={handleChange} className={inputClass + " mt-1"} /></div>
                     <div><label className="block text-sm font-medium text-gray-700">役職</label><input type="text" name="position" value={formData.position} onChange={handleChange} className={inputClass + " mt-1"} /></div>
                     <div><label className="block text-sm font-medium text-gray-700">電話番号</label><input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass + " mt-1"} /></div>
@@ -92,9 +153,12 @@ const Users: React.FC = () => {
     const UserCard: React.FC<{u: ClientUser}> = ({u}) => (
         <div className="bg-white p-4 rounded-lg shadow-sm border">
             <div className="flex justify-between items-start">
-                <div>
-                    <div className="font-bold text-gray-800">{u.name}</div>
-                    <div className="text-sm text-gray-500">{u.position}</div>
+                 <div className="flex items-center space-x-3">
+                    <img src={u.avatar || 'https://i.pravatar.cc/150?u=' + u.email} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
+                    <div>
+                        <div className="font-bold text-gray-800">{u.name}</div>
+                        <div className="text-sm text-gray-500">{u.position}</div>
+                    </div>
                 </div>
                  {u.isPrimaryContact && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-semibold">主担当者</span>}
             </div>
@@ -136,8 +200,15 @@ const Users: React.FC = () => {
                         {clientSideUsers.map(u => (
                             <tr key={u.id}>
                                 <td className="px-6 py-4">
-                                    <div className="font-medium text-gray-900">{u.name}</div>
-                                    {u.isPrimaryContact && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">主担当者</span>}
+                                     <div className="flex items-center">
+                                        <div className="flex-shrink-0 h-10 w-10">
+                                            <img className="h-10 w-10 rounded-full object-cover" src={u.avatar || 'https://i.pravatar.cc/150?u=' + u.email} alt={u.name} />
+                                        </div>
+                                        <div className="ml-4">
+                                            <div className="font-medium text-gray-900">{u.name}</div>
+                                            {u.isPrimaryContact && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">主担当者</span>}
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{u.position}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700"><div>{u.email}</div><div>{u.phone}</div></td>

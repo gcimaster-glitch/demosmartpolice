@@ -129,13 +129,15 @@ const SeminarEditorView: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">メイン画像</label>
-                        <ImageUploader imageUrl={formData.mainImageUrl} onImageChange={url => setFormData(p => ({...p, mainImageUrl: url}))} onImageRemove={() => setFormData(p => ({...p, mainImageUrl: ''}))} recommendedSizeText="推奨サイズ: 800x400px" maxWidth={800} maxHeight={400} />
+                        {/* FIX: Add missing maxSizeInMB prop */}
+                        <ImageUploader imageUrl={formData.mainImageUrl} onImageChange={url => setFormData(p => ({...p, mainImageUrl: url}))} onImageRemove={() => setFormData(p => ({...p, mainImageUrl: ''}))} recommendedSizeText="推奨サイズ: 800x400px" maxWidth={800} maxHeight={400} maxSizeInMB={1} />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">サブ画像 (最大3枚)</label>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                             {[0, 1, 2].map(i => (
-                                <ImageUploader key={i} imageUrl={formData.subImageUrls[i]} onImageChange={url => handleSubImageChange(url, i)} onImageRemove={() => handleSubImageRemove(i)} recommendedSizeText="推奨: 400x300px" maxWidth={400} maxHeight={300} />
+                                // FIX: Add missing maxSizeInMB prop
+                                <ImageUploader key={i} imageUrl={formData.subImageUrls[i]} onImageChange={url => handleSubImageChange(url, i)} onImageRemove={() => handleSubImageRemove(i)} recommendedSizeText="推奨: 400x300px" maxWidth={400} maxHeight={300} maxSizeInMB={1} />
                             ))}
                         </div>
                     </div>
