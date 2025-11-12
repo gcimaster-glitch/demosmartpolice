@@ -17,10 +17,26 @@ dashboard.get('/', authMiddleware, async (c) => {
       }, 400);
     }
 
-    // クライアント情報取得
-    const client = await queryFirst<Client>(
+    // クライアント情報と担当者情報を取得
+    const client = await queryFirst<any>(
       c.env.DB,
-      'SELECT * FROM clients WHERE id = ?',
+      `SELECT 
+        c.*,
+        s1.id as main_assignee_staff_id,
+        s1.name as main_assignee_name,
+        s1.real_name as main_assignee_real_name,
+        s1.position as main_assignee_position,
+        s1.phone as main_assignee_phone,
+        s1.email as main_assignee_email,
+        s1.photo_url as main_assignee_photo_url,
+        s1.profile as main_assignee_profile,
+        s2.id as sub_assignee_staff_id,
+        s2.name as sub_assignee_name,
+        s2.real_name as sub_assignee_real_name
+      FROM clients c
+      LEFT JOIN staff s1 ON c.main_assignee_id = s1.id
+      LEFT JOIN staff s2 ON c.sub_assignee_id = s2.id
+      WHERE c.id = ?`,
       user.clientId
     );
 
@@ -78,6 +94,24 @@ dashboard.get('/', authMiddleware, async (c) => {
       .bind(user.clientId)
       .first<{ total: number }>();
 
+    // 担当者情報を整形
+    const mainAssignee = client.main_assignee_staff_id ? {
+      id: client.main_assignee_staff_id,
+      name: client.main_assignee_name,
+      realName: client.main_assignee_real_name,
+      position: client.main_assignee_position,
+      phone: client.main_assignee_phone,
+      email: client.main_assignee_email,
+      photoUrl: client.main_assignee_photo_url,
+      profile: client.main_assignee_profile,
+    } : null;
+
+    const subAssignee = client.sub_assignee_staff_id ? {
+      id: client.sub_assignee_staff_id,
+      name: client.sub_assignee_name,
+      realName: client.sub_assignee_real_name,
+    } : null;
+
     return c.json<ApiResponse>({ 
       success: true, 
       data: {
@@ -88,7 +122,16 @@ dashboard.get('/', authMiddleware, async (c) => {
           remainingTickets: client.remaining_tickets,
           planId: client.plan_id,
           planName: plan?.name || '',
+          mainAssigneeId: client.main_assignee_id,
+          subAssigneeId: client.sub_assignee_id,
         },
+        plan: {
+          id: plan?.id,
+          name: plan?.name,
+          hasDedicatedManager: plan?.name !== 'Free', // Freeプラン以外は専属担当者あり
+        },
+        mainAssignee,
+        subAssignee,
         stats: {
           unreadTickets: unreadTicketsResult?.count || 0,
           monthlyTicketUsage: ticketConsumptionResult?.total || 0,

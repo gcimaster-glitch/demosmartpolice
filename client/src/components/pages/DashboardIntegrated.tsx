@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import CrisisManagerCard from '../CrisisManagerCard.tsx';
+import CrisisManagerCardIntegrated from '../CrisisManagerCardIntegrated.tsx';
 import { dashboardAPI } from '../../services/apiClient.ts';
 import { useAuth } from '../../AuthContext.tsx';
+
+interface CrisisManager {
+  id: number;
+  name: string;
+  realName: string;
+  position?: string;
+  phone?: string;
+  email?: string;
+  photoUrl?: string;
+  profile?: string;
+}
 
 interface DashboardData {
   client: {
@@ -12,7 +23,16 @@ interface DashboardData {
     remainingTickets: number;
     planId: string;
     planName: string;
+    mainAssigneeId?: number | null;
+    subAssigneeId?: number | null;
   };
+  plan?: {
+    id: string;
+    name: string;
+    hasDedicatedManager: boolean;
+  };
+  mainAssignee?: CrisisManager | null;
+  subAssignee?: CrisisManager | null;
   stats: {
     unreadTickets: number;
     monthlyTicketUsage: number;
@@ -120,7 +140,10 @@ const DashboardIntegrated: React.FC = () => {
                         </div>
                     </div>
                     <div className="lg:w-80 lg:sticky lg:top-20 h-fit">
-                        <CrisisManagerCard />
+                        <CrisisManagerCardIntegrated 
+                            hasDedicatedManager={dashboardData?.plan?.hasDedicatedManager || false}
+                            crisisManager={dashboardData?.mainAssignee || null}
+                        />
                     </div>
                 </div>
             </div>
@@ -244,7 +267,10 @@ const DashboardIntegrated: React.FC = () => {
                 </div>
 
                 <div className="lg:w-80 lg:sticky lg:top-20 h-fit">
-                    <CrisisManagerCard />
+                    <CrisisManagerCardIntegrated 
+                        hasDedicatedManager={dashboardData?.plan?.hasDedicatedManager || false}
+                        crisisManager={dashboardData?.mainAssignee || null}
+                    />
                 </div>
             </div>
         </div>

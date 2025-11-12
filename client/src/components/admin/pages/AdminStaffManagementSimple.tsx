@@ -47,6 +47,7 @@ const AdminStaffManagementSimple: React.FC = () => {
     role: 'Consultant',
     position: '',
     phone: '',
+    photoUrl: '',
     profile: '',
   });
 
@@ -95,6 +96,7 @@ const AdminStaffManagementSimple: React.FC = () => {
           role: s.role || 'Consultant',
           position: s.position || '',
           phone: s.phone || '',
+          photoUrl: s.photo_url || '',
           profile: s.profile || '',
         });
       } else {
@@ -124,6 +126,7 @@ const AdminStaffManagementSimple: React.FC = () => {
         role: formData.role,
         position: formData.position || undefined,
         phone: formData.phone || undefined,
+        photoUrl: formData.photoUrl || undefined,
         profile: formData.profile || undefined,
       };
 
@@ -296,6 +299,21 @@ const AdminStaffManagementSimple: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full p-2 border rounded-md"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  写真URL
+                </label>
+                <input
+                  type="url"
+                  name="photoUrl"
+                  value={formData.photoUrl || ''}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-md"
+                  placeholder="https://example.com/photo.jpg"
+                />
+                <p className="text-xs text-gray-500 mt-1">画像のURLを入力してください</p>
               </div>
             </div>
 
