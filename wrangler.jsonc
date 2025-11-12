@@ -1,16 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "smartpolis-portal",
+  "name": "demosmartpolice",
   "main": "src/index.tsx",
   "compatibility_date": "2024-01-01",
   "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
 
   // D1 Database Configuration
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "smartpolis-db",
-      "database_id": "TO_BE_CREATED"
+      "database_id": "9e393c7b-94eb-45d1-a13d-fc61aedfee5e"
     }
   ]
 }
